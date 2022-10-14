@@ -1,0 +1,10 @@
+import Dragger;
+import React;
+
+fun main() {
+
+  addRoute("/", fun(_) { React.main() });
+  servePages()
+}
+
+main()
