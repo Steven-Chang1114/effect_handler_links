@@ -1,19 +1,25 @@
 module React {
-  alien javascript "js/src/index.js" {
+  alien javascript "src/index.js" {
     render : () ~%~> ();
   }
 }
 
-module Demo {
-  alien javascript "js/app.js" {
+module Test {
+  alien javascript "js/ffi.js" {
     yell : () ~%~> ();
   }
 }
 
-fun mainPage() {
-    
+module Demo {
+  alien javascript "js/demo.js" {
+    hello : (String) ~%~> ();
+  }
+}
+
+fun mainPage() { 
     var _ = spawnClient {
-        Demo.yell();
+        Demo.hello("Hello World");
+        Test.yell();
         React.render()
     };
 
@@ -29,7 +35,8 @@ fun mainPage() {
 fun main() {
   addRoute("/", fun(_) { mainPage() });
   addStaticRoute("/js", "js", [("js", "text/javascript")]);
-  addStaticRoute("/js/src", "js", [("js", "text/javascript")]);
+  addStaticRoute("/src", "js", [("js", "text/javascript")]);
+   addStaticRoute("/node_modules", "js", [("js", "text/javascript")]);
   servePages()
 }
 
