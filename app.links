@@ -4,16 +4,23 @@ module React {
   }
 }
 
+module Demo {
+  alien javascript "js/app.js" {
+    yell : () ~%~> ();
+  }
+}
+
 fun mainPage() {
     
     var _ = spawnClient {
+        Demo.yell();
         React.render()
     };
 
     page
         <html>
             <body>
-                <h1>hiii</h1>
+                <h1>Hello</h1>
                 <div id="root"></div>
             </body>
         </html>
@@ -21,6 +28,7 @@ fun mainPage() {
 
 fun main() {
   addRoute("/", fun(_) { mainPage() });
+  addStaticRoute("/js", "js", [("js", "text/javascript")]);
   addStaticRoute("/js/src", "js", [("js", "text/javascript")]);
   servePages()
 }

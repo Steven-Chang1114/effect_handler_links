@@ -1,7 +1,7 @@
 // import { _start } from "./src/App";
 
 function _yell() {
-    console.log(`Wired up`)
+    console.log(`FFI wired up successfully`)
 }
 
 
