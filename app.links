@@ -1,0 +1,28 @@
+module React {
+  alien javascript "js/src/index.js" {
+    render : () ~%~> ();
+  }
+}
+
+fun mainPage() {
+    
+    var _ = spawnClient {
+        React.render()
+    };
+
+    page
+        <html>
+            <body>
+                <h1>hiii</h1>
+                <div id="root"></div>
+            </body>
+        </html>
+}
+
+fun main() {
+  addRoute("/", fun(_) { mainPage() });
+  addStaticRoute("/js/src", "js", [("js", "text/javascript")]);
+  servePages()
+}
+
+main()
