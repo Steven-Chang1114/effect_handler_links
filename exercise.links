@@ -1,0 +1,30 @@
+alien javascript "js/demo.js" hello : (String) ~%~> ();
+alien javascript "js/demo.js" btnOnCLick : () ~%~> ();
+
+fun mainPage() {
+    #fun btnOnClick() {
+    #    var _ = spawnClient {
+    #        hello("hi")
+    #    }
+    #}
+
+    var _ = spawnClient {
+        hello("hi")
+    };
+
+    page
+        <html>
+            <body>
+                <h1>hi</h1>
+                <div id="root"></div>
+            </body>
+        </html>
+}
+
+fun main() {
+  addRoute("/", fun(_) { mainPage() });
+  addStaticRoute("/js", "js", [("js", "text/javascript")]);
+  servePages()
+}
+
+main()

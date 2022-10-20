@@ -1,6 +1,10 @@
-function _hello() {
-    console.log("FUNCTION TRIGGERED")
-    //return "HELLO"
+function _hello(val) {
+    console.log(`${val}`)
 }
 
-var hello = _$Links.kify(_hello);
+function _btnOnCLick() {
+    console.log(`CLICKED`)
+}
+
+let hello = LINKS.kify(_hello);
+let btnOnCLick = LINKS.kify(_btnOnCLick);
