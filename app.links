@@ -1,5 +1,5 @@
 module React {
-  alien javascript "src/index.js" {
+  alien javascript "build/static/js/main.75d44c51.js" {
     render : () ~%~> ();
   }
 }
@@ -26,6 +26,7 @@ fun mainPage() {
     page
         <html>
             <body>
+                <script type="module" src="src/index.js"></script>
                 <h1>Hello</h1>
                 <div id="root"></div>
             </body>
@@ -35,8 +36,8 @@ fun mainPage() {
 fun main() {
   addRoute("/", fun(_) { mainPage() });
   addStaticRoute("/js", "js", [("js", "text/javascript")]);
-  addStaticRoute("/src", "js", [("js", "text/javascript")]);
-   addStaticRoute("/node_modules", "js", [("js", "text/javascript")]);
+  addStaticRoute("/build/static/js", "js", [("js", "text/javascript")]);
+  addStaticRoute("/node_modules", "js", [("js", "text/javascript")]);
   servePages()
 }
 
