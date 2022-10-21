@@ -1,5 +1,5 @@
 module React {
-  alien javascript "build/static/js/main.75d44c51.js" {
+  alien javascript "js/react.js" {
     render : () ~%~> ();
   }
 }
@@ -26,8 +26,7 @@ fun mainPage() {
     page
         <html>
             <body>
-                <script type="module" src="src/index.js"></script>
-                <h1>Hello</h1>
+                <h1>Hello World</h1>
                 <div id="root"></div>
             </body>
         </html>
