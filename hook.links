@@ -6,7 +6,7 @@ fun useState(val) {
 
 fun setNum(val) client {
     handle(useState(val)) {
-        case SetNum(val, resume) -> resume(val)
+        case SetNum(val, resume) -> replaceNode(<div id="number">{intToXml(val)}</div>,getNodeById("number"))
         case Return(x) -> x
     }
 }
@@ -18,7 +18,7 @@ fun mainPage() {
     page
         <html>
             <body>
-                {intToXml(num)}
+                <div id="number">{intToXml(num)}</div>
                 <input type="button" value="set number to 1" l:onclick="{setNum(1)}"/>
                 <input type="button" value="set number to 2" l:onclick="{setNum(2)}"/>
             </body>
