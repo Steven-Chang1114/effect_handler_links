@@ -1,0 +1,34 @@
+# alien javascript "js/hook.js" btnOnCLick : () ~%~> ();
+
+fun useState(val) {
+    do SetNum(val)
+}
+
+fun setNum(val) client {
+    handle(useState(val)) {
+        case SetNum(val, resume) -> resume(val)
+        case Return(x) -> x
+    }
+}
+
+fun mainPage() {
+
+    var num = 0;
+
+    page
+        <html>
+            <body>
+                {intToXml(num)}
+                <input type="button" value="set number to 1" l:onclick="{setNum(1)}"/>
+                <input type="button" value="set number to 2" l:onclick="{setNum(2)}"/>
+            </body>
+        </html>
+}
+
+fun main() {
+  addRoute("/", fun(_) { mainPage() });
+  addStaticRoute("/js", "js", [("js", "text/javascript")]);
+  servePages()
+}
+
+main()
