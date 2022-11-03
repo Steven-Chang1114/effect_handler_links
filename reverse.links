@@ -1,13 +1,13 @@
-fun run() {
+fun printMessage() {
     do ReversePrint("Hello\n");
     do ReversePrint("World\n")
 }
 
-fun printMessage(m) {
+fun reverse(m) {
     handle(m()) {
         case ReversePrint(val, k) -> k(()); print(val)
         case Return(x) -> ()
     }
 }
 
-printMessage(run)
+reverse(printMessage)
