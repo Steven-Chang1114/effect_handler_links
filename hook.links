@@ -6,8 +6,13 @@ fun useState(val) {
 
 fun setNum(val) client {
     handle(useState(val)) {
-        case SetNum(val, resume) -> replaceNode(<div id="number">{intToXml(val)}</div>,getNodeById("number"))
-        case Return(x) -> x
+        case SetNum(val, resume) -> resume(
+                                            replaceNode(
+                                                <div id="number">{intToXml(val)}</div>,
+                                                getNodeById("number")
+                                            )
+                                        )
+        case Return(x) -> ()
     }
 }
 

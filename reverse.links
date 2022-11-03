@@ -5,12 +5,9 @@ fun run() {
 
 fun printMessage(m) {
     handle(m()) {
-        case ReversePrint(val, k) -> k(print("")); print(val)
+        case ReversePrint(val, k) -> k(()); print(val)
+        case Return(x) -> ()
     }
 }
 
-fun main() {
-  printMessage(run)
-}
-
-main()
+printMessage(run)
