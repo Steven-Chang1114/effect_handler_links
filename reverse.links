@@ -1,0 +1,16 @@
+fun run() {
+    do ReversePrint("Hello\n");
+    do ReversePrint("World\n")
+}
+
+fun printMessage(m) {
+    handle(m()) {
+        case ReversePrint(val, k) -> k(print("")); print(val)
+    }
+}
+
+fun main() {
+  printMessage(run)
+}
+
+main()

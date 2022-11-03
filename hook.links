@@ -12,13 +12,10 @@ fun setNum(val) client {
 }
 
 fun mainPage() {
-
-    var num = 0;
-
     page
         <html>
             <body>
-                <div id="number">{intToXml(num)}</div>
+                <div id="number">{intToXml(0)}</div>
                 <input type="button" value="set number to 1" l:onclick="{setNum(1)}"/>
                 <input type="button" value="set number to 2" l:onclick="{setNum(2)}"/>
             </body>
