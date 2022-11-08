@@ -1,13 +1,20 @@
 fun printMessage() {
-    do ReversePrint("Hello\n");
-    do ReversePrint("World\n")
+    do Print("Hello\n");
+    do Print("World\n")
 }
 
 fun reverse(m) {
     handle(m()) {
-        case ReversePrint(val, k) -> k(()); print(val)
+        case Print(val, k) -> k(()); print(val)
         case Return(x) -> ()
     }
 }
 
-reverse(printMessage)
+fun forward(m) {
+    handle(m()) {
+        case Print(val, k) -> k(print(val))
+        case Return(x) -> ()
+    }
+}
+
+forward(printMessage)
