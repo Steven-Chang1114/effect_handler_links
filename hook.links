@@ -1,18 +1,24 @@
 # alien javascript "js/hook.js" btnOnCLick : () ~%~> ();
 
-fun useState(val) {
-    var cur = do GetNum();
-    do SetNum(cur + val)
-}
-
 fun replaceNewElement(val) {
     replaceNode(<div id="number">{intToXml(val)}</div>,getNodeById("number"))
 }
 
-fun setNum(val) client {
-    handle(useState(val))(num <- [0]) {
-        case SetNum(res, resume) -> resume(replaceNewElement(res), [res] ++ num)
-        case GetNum(resume) -> resume(selectElem(num, 0), num)
+fun getNum() {
+    do GetNum()
+}
+
+fun setNum(val) {
+    fun () {
+        var cur = getNum();
+        do SetNum(cur + val)
+    }
+}
+
+fun useState(m) client {
+    handle(m())(num <- [0]) {
+        case SetNum(val, k) -> k(replaceNewElement(val), [val] ++ num)
+        case GetNum(k) -> k(selectElem(num, 0), num)
         case Return(x) -> x
     }
 }
@@ -21,9 +27,15 @@ fun mainPage() {
     page
         <html>
             <body>
-                <div id="number">{intToXml(-9)}</div>
-                <input type="button" value="sub number by 1" l:onclick="{setNum(-1)}"/>
-                <input type="button" value="add number by 1" l:onclick="{setNum(1)}"/>
+                <div id="number">{intToXml(0)}</div>
+                <input 
+                    type="button" 
+                    value="sub number by 1" 
+                    l:onclick="{useState(setNum(-1))}"/>
+                <input 
+                    type="button" 
+                    value="add number by 1" 
+                    l:onclick="{useState(setNum(1))}"/>
             </body>
         </html>
 }
