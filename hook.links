@@ -10,15 +10,15 @@ fun getNum() {
 
 fun setNum(val) {
     fun () {
-        var cur = getNum();
-        do SetNum(cur + val)
+        var newVal = getNum() + val;
+        do SetNum(newVal)
     }
 }
 
 fun useState(m) client {
-    handle(m())(num <- [0]) {
-        case SetNum(val, k) -> k(replaceNewElement(val), [val] ++ num)
-        case GetNum(k) -> k(selectElem(num, 0), num)
+    handle(m())(globalVar <- (num = 0)) {
+        case SetNum(val, k) -> k(replaceNewElement(val), (globalVar with num = val))
+        case GetNum(k) -> k(globalVar.num, globalVar)
         case Return(x) -> x
     }
 }
