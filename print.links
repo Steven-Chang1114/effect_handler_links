@@ -17,4 +17,6 @@ fun forward(m) {
     }
 }
 
+
+# reverse(printMessage)
 forward(printMessage)
