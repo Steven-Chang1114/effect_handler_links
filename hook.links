@@ -1,24 +1,36 @@
 # alien javascript "js/hook.js" btnOnCLick : () ~%~> ();
 
-fun replaceNewElement(val) {
-    replaceNode(<div id="number">{intToXml(val)}</div>,getNodeById("number"))
-}
-
 fun getNum() {
     do GetNum()
 }
 
+fun getNumPrev() {
+    do GetNumPrev()
+}
+
 fun setNum(val) {
     fun () {
-        var newVal = getNum() + val;
-        do SetNum(newVal)
+        do SetNum(val)
+    }
+}
+
+fun setNumPrev(val) {
+    fun () {
+        var newVal = getNumPrev() + val;
+        do SetNumPrev(newVal)
     }
 }
 
 fun useState(m) client {
-    handle(m())(globalVar <- (num = 0)) {
-        case SetNum(val, k) -> k(replaceNewElement(val), (globalVar with num = val))
+    handle(m())(globalVar <- (num = 0, numPrev = 5)) {
+        case SetNum(val, k) -> k(replaceNode(<div id="num">{intToXml(val)}</div>,getNodeById("num")), 
+                                (globalVar with num = val))
         case GetNum(k) -> k(globalVar.num, globalVar)
+
+        case SetNumPrev(val, k) -> k(replaceNode(<div id="numPrev">{intToXml(val)}</div>,getNodeById("numPrev")),
+                                    (globalVar with numPrev = val))
+        case GetNumPrev(k) -> k(globalVar.numPrev, globalVar)
+
         case Return(x) -> x
     }
 }
@@ -27,15 +39,29 @@ fun mainPage() {
     page
         <html>
             <body>
-                <div id="number">{intToXml(0)}</div>
-                <input 
-                    type="button" 
-                    value="sub number by 1" 
-                    l:onclick="{useState(setNum(-1))}"/>
-                <input 
-                    type="button" 
-                    value="add number by 1" 
-                    l:onclick="{useState(setNum(1))}"/>
+                <div>
+                    <div id="num">{intToXml(0)}</div>
+                    <input 
+                        type="button" 
+                        value="set number to 1" 
+                        l:onclick="{useState(setNum(1))}"/>
+                    <input 
+                        type="button" 
+                        value="set number to 2" 
+                        l:onclick="{useState(setNum(2))}"/>
+                </div>
+
+                <div>
+                    <div id="numPrev">{intToXml(100)}</div>
+                    <input 
+                        type="button" 
+                        value="sub number by 1" 
+                        l:onclick="{useState(setNumPrev(-1))}"/>
+                    <input 
+                        type="button" 
+                        value="add number by 1" 
+                        l:onclick="{useState(setNumPrev(1))}"/>
+                </div>
             </body>
         </html>
 }
