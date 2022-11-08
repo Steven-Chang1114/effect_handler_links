@@ -1,7 +1,8 @@
 # alien javascript "js/hook.js" btnOnCLick : () ~%~> ();
 
 fun useState(val) {
-    do SetNum(val)
+    var cur = do GetNum();
+    do SetNum(cur + val)
 }
 
 fun replaceNewElement(val) {
@@ -9,8 +10,9 @@ fun replaceNewElement(val) {
 }
 
 fun setNum(val) client {
-    handle(useState(val))(num <- 0) {
-        case SetNum(val, resume) -> resume(replaceNewElement(val), num)
+    handle(useState(val))(num <- [0]) {
+        case SetNum(res, resume) -> resume(replaceNewElement(res), [res] ++ num)
+        case GetNum(resume) -> resume(selectElem(num, 0), num)
         case Return(x) -> x
     }
 }
@@ -19,9 +21,9 @@ fun mainPage() {
     page
         <html>
             <body>
-                <div id="number">{intToXml(0)}</div>
-                <input type="button" value="set number to 1" l:onclick="{setNum(1)}"/>
-                <input type="button" value="set number to 2" l:onclick="{setNum(2)}"/>
+                <div id="number">{intToXml(-9)}</div>
+                <input type="button" value="sub number by 1" l:onclick="{setNum(-1)}"/>
+                <input type="button" value="add number by 1" l:onclick="{setNum(1)}"/>
             </body>
         </html>
 }
