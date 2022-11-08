@@ -12,7 +12,7 @@ fun reverse(m) {
 
 fun forward(m) {
     handle(m()) {
-        case Print(val, k) -> k(print(val))
+        case Print(val, k) -> print(val); k(())
         case Return(x) -> ()
     }
 }
