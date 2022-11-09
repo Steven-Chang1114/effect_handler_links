@@ -1,10 +1,12 @@
 import Hook from "./Hook.js";
+import RacingLine from "./RacingLine.js";
 
 function App() {
   return (
     <div>
       Hello
-      <Hook></Hook>
+      <Hook />
+      <RacingLine />
     </div>
   );
 }
