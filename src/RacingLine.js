@@ -1,6 +1,6 @@
 import './RacingLine.css';
 import { useDeferredValue, useTransition, useState, useRef, useEffect } from 'react';
-import { useFrame } from "react-three-fiber";
+import { useFrame } from "@react-three/fiber";
 
 function Hook() {
     const startx = 10
