@@ -9,16 +9,12 @@ fun getNumPrev() {
 }
 
 fun setNum(val) {
-    fun () {
-        do SetNum(val)
-    }
+    do SetNum(val)
 }
 
 fun setNumPrev(val) {
-    fun () {
-        var newVal = getNumPrev() + val;
-        do SetNumPrev(newVal)
-    }
+    var newVal = getNumPrev() + val;
+    do SetNumPrev(newVal)
 }
 
 fun useState(m) client {
@@ -35,7 +31,16 @@ fun useState(m) client {
     }
 }
 
+fun manager() client {
+    receive {
+        case SetNum(val) -> setNum(val)
+        case SetNumPrev(val) -> setNumPrev(val)
+    };
+    manager()
+} 
+
 fun mainPage() {
+    var p = spawnClient { useState(manager) };
     page
         <html>
             <body>
@@ -44,11 +49,11 @@ fun mainPage() {
                     <input 
                         type="button" 
                         value="set number to 1" 
-                        l:onclick="{useState(setNum(1))}"/>
+                        l:onclick="{p ! SetNum(1)}"/>
                     <input 
                         type="button" 
                         value="set number to 2" 
-                        l:onclick="{useState(setNum(2))}"/>
+                        l:onclick="{p ! SetNum(2)}"/>
                 </div>
 
                 <div>
@@ -56,11 +61,11 @@ fun mainPage() {
                     <input 
                         type="button" 
                         value="sub number by 1" 
-                        l:onclick="{useState(setNumPrev(-1))}"/>
+                        l:onclick="{p ! SetNumPrev(-1)}"/>
                     <input 
                         type="button" 
                         value="add number by 1" 
-                        l:onclick="{useState(setNumPrev(1))}"/>
+                        l:onclick="{p ! SetNumPrev(1)}"/>
                 </div>
             </body>
         </html>

@@ -20,5 +20,5 @@ function Hook() {
       </div>
     );
   }
-  
+  // change effect to operations, and introduce effect type in report, change discharging to perfrom
   export default Hook;
