@@ -1,51 +1,35 @@
 import './RacingLine.css';
-import { useDeferredValue, useTransition, useState, useRef, useEffect } from 'react';
+import { useDeferredValue, useTransition, useState, useRef, useEffect, startTransition } from 'react';
 import { useFrame } from "@react-three/fiber";
+import Line from './Line.js';
 
 function Hook() {
-    const startx = 10
-    const starty = 10
-    const endx = 390
-    const height = 25
-    const interval = 40
 
     let [prio, setPrio] = useState("Low");
     let [color, setColor] = useState("red");
-    let [y, setY] = useState(starty);
-    const ctxRef = useRef(null);
-    const canvasRef = useRef(null);
+    let [lines, setLines] = useState([]);
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const context = canvas.getContext("2d")
-        ctxRef.current = context;
-    }, [])
+    const containerRef = useRef(null);
 
-    let addLine = (rate) => {
-        const ctx = ctxRef.current
-        ctx.fillStyle= color;
+    let addLine = (prio, color) => {
+        const ref = containerRef.current
 
-        let x = startx
-        window.requestAnimationFrame(function animate() {
-            if (x < endx) {
-                x += rate
-                ctx.fillRect(x, y, 2, height);
-                window.requestAnimationFrame(animate)
+        setLines((prevState) => ([
+            ...prevState,
+            {
+                prio,
+                component: <Line color={color}/>
             }
-        })
+        ]))
     }
 
     let buttonPressed = () => {
         switch(prio) {
             case "High":
-                console.log("enqueue high"); 
-                addLine(2)
-                setY(prev => prev + interval)
+                addLine("High", color)
                 break;
             case "Low":
-                console.log("enqueue low"); 
-                addLine(1)
-                setY(prev => prev + interval)
+                addLine("Low", color)
                 break;
             default:
                 console.log("error") 
@@ -54,7 +38,21 @@ function Hook() {
 
     return (
       <div>
-        <canvas id="box" width="400" height="600" className="box center block" ref={canvasRef}></canvas>
+        <div className='container' ref={containerRef}>
+            {lines.map(el => {
+                if (el.prio === "Low") {
+                    console.log("enqueue low"); 
+                    return startTransition(() => {
+                        return el.component
+                    })
+                } else if (el.prio === "High") {
+                    console.log("enqueue high"); 
+                    return el.component
+                } else {
+                    console.log("error")
+                }
+            })}
+        </div>
         <div className="selection margin-10 center">
             <select id="line-color" value={color} onChange={e => setColor(e.target.value)}>
                 <option value="red">Red</option>

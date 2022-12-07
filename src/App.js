@@ -1,5 +1,6 @@
 import Hook from "./Hook.js";
 import RacingLine from "./RacingLine.js";
+import InputForm from "./InputForm.js";
 
 function App() {
   return (
@@ -7,6 +8,7 @@ function App() {
       Hello
       <Hook />
       <RacingLine />
+      <InputForm />
     </div>
   );
 }

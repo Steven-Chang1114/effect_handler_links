@@ -1,0 +1,12 @@
+@keyframes example {
+    from {width: 0px;}
+    to {width: 390px;}
+  }
+
+.line {
+    width: 390px;
+    height: 25px;
+    margin-top: 14.5px;
+    margin-left: 5px;
+    animation-name: example;
+}

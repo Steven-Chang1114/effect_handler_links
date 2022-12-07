@@ -4,28 +4,28 @@ fun getNum() {
     do GetNum()
 }
 
-fun getNumPrev() {
-    do GetNumPrev()
+fun getNumCalc() {
+    do GetNumCalc()
 }
 
 fun setNum(val) {
     do SetNum(val)
 }
 
-fun setNumPrev(val) {
-    var newVal = getNumPrev() + val;
-    do SetNumPrev(newVal)
+fun setNumCalc(val) {
+    var newVal = getNumCalc() + val;
+    do SetNumCalc(newVal)
 }
 
 fun useState(m) client {
-    handle(m())(globalVar <- (num = 0, numPrev = 5)) {
+    handle(m())(globalVar <- (num = 0, numCalc = 5)) {
         case SetNum(val, k) -> k(replaceNode(<div id="num">{intToXml(val)}</div>,getNodeById("num")), 
                                 (globalVar with num = val))
         case GetNum(k) -> k(globalVar.num, globalVar)
 
-        case SetNumPrev(val, k) -> k(replaceNode(<div id="numPrev">{intToXml(val)}</div>,getNodeById("numPrev")),
-                                    (globalVar with numPrev = val))
-        case GetNumPrev(k) -> k(globalVar.numPrev, globalVar)
+        case SetNumCalc(val, k) -> k(replaceNode(<div id="numCalc">{intToXml(val)}</div>,getNodeById("numCalc")),
+                                    (globalVar with numCalc = val))
+        case GetNumCalc(k) -> k(globalVar.numCalc, globalVar)
 
         case Return(x) -> x
     }
@@ -34,7 +34,7 @@ fun useState(m) client {
 fun manager() client {
     receive {
         case SetNum(val) -> setNum(val)
-        case SetNumPrev(val) -> setNumPrev(val)
+        case SetNumCalc(val) -> setNumCalc(val)
     };
     manager()
 } 
@@ -57,15 +57,15 @@ fun mainPage() {
                 </div>
 
                 <div>
-                    <div id="numPrev">{intToXml(100)}</div>
+                    <div id="numCalc">{intToXml(100)}</div>
                     <input 
                         type="button" 
                         value="sub number by 1" 
-                        l:onclick="{p ! SetNumPrev(-1)}"/>
+                        l:onclick="{p ! SetNumCalc(-1)}"/>
                     <input 
                         type="button" 
                         value="add number by 1" 
-                        l:onclick="{p ! SetNumPrev(1)}"/>
+                        l:onclick="{p ! SetNumCalc(1)}"/>
                 </div>
             </body>
         </html>
