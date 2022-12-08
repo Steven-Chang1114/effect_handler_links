@@ -57,7 +57,7 @@ fun mainPage() {
                 </div>
 
                 <div>
-                    <div id="numCalc">{intToXml(100)}</div>
+                    <div id="numCalc">{intToXml(5)}</div>
                     <input 
                         type="button" 
                         value="sub number by 1" 
