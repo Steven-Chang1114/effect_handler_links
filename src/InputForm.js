@@ -6,7 +6,7 @@ function InputForm(props) {
     const [list, setList] = useState([])
     const [isPending, startTransition] = useTransition()
 
-    const size = 20000
+    const size = 30000
 
     const handleOnChange = (e) => {
         setInput(e.target.value)

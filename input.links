@@ -1,60 +1,47 @@
 module Test {
   alien javascript "js/demo.js" {
     printResult : (String) ~%~> ();
-    btnOnCLick : () ~%~> ();
+    setInput : (String) ~%~> ();
   }
 }
 
-fun getNum() {
-    do GetNum()
-}
-
-fun getNumCalc() {
-    do GetNumCalc()
-}
-
-fun setNum(val) {
-    do SetNum(val)
-}
-
-fun setNumCalc(val) {
-    var newVal = getNumCalc() + val;
-    do SetNumCalc(newVal)
+fun showResultPrio(val) {
+    do ShowTypePrio(val);
+    do ShowResultPrio(val)
 }
 
 fun useState(m) client {
-    handle(m())(globalVar <- (num = 0, numCalc = 5)) {
-        case SetNum(val, k) -> k(replaceNode(<div id="num">{intToXml(val)}</div>,getNodeById("num")), 
-                                (globalVar with num = val))
-        case GetNum(k) -> k(globalVar.num, globalVar)
-
-        case SetNumCalc(val, k) -> k(replaceNode(<div id="numCalc">{intToXml(val)}</div>,getNodeById("numCalc")),
-                                    (globalVar with numCalc = val))
-        case GetNumCalc(k) -> k(globalVar.numCalc, globalVar)
-
+    handle(m()) {
+        case ShowTypePrio(val, k) -> k(Test.setInput(val))
+        case ShowResultPrio(val, k) -> k(Test.printResult(val))
         case Return(x) -> x
     }
 }
 
 fun manager() client {
     receive {
-        case ShowResult(val) -> Test.printResult(val)
-        case SetNumCalc(val) -> setNumCalc(val)
+        case ShowResult(val) -> Test.setInput(val); Test.printResult(val)
+        case ShowResultPrio(val) -> showResultPrio(val)
     };
     manager()
 } 
 
 fun mainPage() {
     var p = spawnClient { 
-        useState(manager);
-        Test.btnOnCLick()
+        useState(manager)
     };
     page
         <html>
             <body>
+                Without priority: 
                 <form l:onkeyup="{p ! ShowResult(pre)}">
                     <input type="text" l:name="pre"
-                        class="input" autocomplete="off"/>
+                        id="input" autocomplete="off"/>
+                </form>
+                With priority: 
+                <form l:onkeyup="{p ! ShowResultPrio(pre)}">
+                    <input type="text" l:name="pre"
+                        id="inputPrio" autocomplete="off"/>
                 </form>
                 <div id="result"></div>
             </body>
