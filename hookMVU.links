@@ -4,10 +4,10 @@ open import MvuAttrs;
 open import MvuEvents;
 
 typename Model = (num: Int);
-typename Message = [| SetNum |];
+typename Message = [| SetNum: Int |];
 
 fun updt(msg, model) {
-  switch (msg) { case SetNum -> (contents = "hello") }
+  switch (msg) { case SetNum(val) -> (num = val) }
 }
 
 var ae = MvuAttrs.empty;
@@ -15,13 +15,15 @@ var he = MvuHTML.empty;
 
 fun view(model) {
   div(a0,
-    button(onClick(fun() { SetNum }),
-      textNode("set number to 1"))
+    button(onClick(fun() { SetNum(1) }),
+      textNode("set number to 1")) +*
+    button(onClick(fun() { SetNum(2) }),
+      textNode("set number to 2"))
     )
 }
 
 fun mainPage() {
-    runSimple("placeholder", (contents=""), view, updt);
+    runSimple("placeholder", (num=0), view, updt);
     page
         <html><body><div id="placeholder"></div></body></html>
 }
