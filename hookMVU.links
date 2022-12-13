@@ -1,74 +1,29 @@
-# alien javascript "js/hook.js" btnOnCLick : () ~%~> ();
+open import Mvu;
+open import MvuHTML;
+open import MvuAttrs;
+open import MvuEvents;
 
-fun getNum() {
-    do GetNum()
+typename Model = (num: Int);
+typename Message = [| SetNum |];
+
+fun updt(msg, model) {
+  switch (msg) { case SetNum -> (contents = "hello") }
 }
 
-fun getNumCalc() {
-    do GetNumCalc()
+var ae = MvuAttrs.empty;
+var he = MvuHTML.empty;
+
+fun view(model) {
+  div(a0,
+    button(onClick(fun() { SetNum }),
+      textNode("set number to 1"))
+    )
 }
-
-fun setNum(val) {
-    do SetNum(val)
-}
-
-fun setNumCalc(val) {
-    var newVal = getNumCalc() + val;
-    do SetNumCalc(newVal)
-}
-
-fun useState(m) client {
-    handle(m())(globalVar <- (num = 0, numCalc = 5)) {
-        case SetNum(val, k) -> k(replaceNode(<div id="num">{intToXml(val)}</div>,getNodeById("num")), 
-                                (globalVar with num = val))
-        case GetNum(k) -> k(globalVar.num, globalVar)
-
-        case SetNumCalc(val, k) -> k(replaceNode(<div id="numCalc">{intToXml(val)}</div>,getNodeById("numCalc")),
-                                    (globalVar with numCalc = val))
-        case GetNumCalc(k) -> k(globalVar.numCalc, globalVar)
-
-        case Return(x) -> x
-    }
-}
-
-fun manager() client {
-    receive {
-        case SetNum(val) -> setNum(val)
-        case SetNumCalc(val) -> setNumCalc(val)
-    };
-    manager()
-} 
 
 fun mainPage() {
-    var p = spawnClient { useState(manager) };
+    runSimple("placeholder", (contents=""), view, updt);
     page
-        <html>
-            <body>
-                <div>
-                    <div id="num">{intToXml(0)}</div>
-                    <input 
-                        type="button" 
-                        value="set number to 1" 
-                        l:onclick="{p ! SetNum(1)}"/>
-                    <input 
-                        type="button" 
-                        value="set number to 2" 
-                        l:onclick="{p ! SetNum(2)}"/>
-                </div>
-
-                <div>
-                    <div id="numCalc">{intToXml(5)}</div>
-                    <input 
-                        type="button" 
-                        value="sub number by 1" 
-                        l:onclick="{p ! SetNumCalc(-1)}"/>
-                    <input 
-                        type="button" 
-                        value="add number by 1" 
-                        l:onclick="{p ! SetNumCalc(1)}"/>
-                </div>
-            </body>
-        </html>
+        <html><body><div id="placeholder"></div></body></html>
 }
 
 fun main() {
