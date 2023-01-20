@@ -107,7 +107,7 @@ fun emptyQueue(){
 }
 
 fun emptyPrioQueue(){
-    (high= emptyQueue(), low=emptyQueue())
+    (high= emptyQueue(), medium=emptyQueue(), low=emptyQueue())
 }
 
 sig queueLength: (Queue(a)) -> Int
