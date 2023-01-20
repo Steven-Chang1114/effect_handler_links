@@ -22,8 +22,8 @@ fun system(f){
 
 typename Point = (x:Int, y:Int);
 typename Queue(a) = (rear: [a], front: [a]);
-typename PrioQueue(a) = (high: Queue(a), low: Queue(a));
-typename Priority = [|High|Low|];
+typename PrioQueue(a) = (high: Queue(a), medium: Queue(a), low: Queue(a));
+typename Priority = [|High|Medium|Low|];
 typename Co(e::Eff) = () {Fork: (Co({ |e}), Priority) -> (), Yield:() |e}~> ();
 typename Time = Int;
 typename Fiber0(e::Eff) = (prio: Priority, f: () {Fork: (Fiber0({ |e})) -> (), Yield:() |e}~> ());
@@ -61,6 +61,7 @@ sig priorityEnqueue: (a, Priority, PrioQueue(a)) ~> PrioQueue(a)
 fun priorityEnqueue(x, prio, pq){
     switch(prio){
         case High -> (pq with high = enqueue(x, pq.high))
+        case Medium -> (pq with medium = enqueue(x, pq.medium))
         case Low -> (pq with low = enqueue(x, pq.low))
     }
 }
@@ -70,9 +71,13 @@ fun priorityDequeue(pq){
     switch(dequeue(pq.high)){
         case (Just(x), q) -> (Just((x, High)), (pq with high= q))
         case (Nothing,_) ->
-            switch(dequeue(pq.low)){
-                case (Nothing, _) -> (Nothing, pq)
-                case (Just(x), q) -> (Just((x, Low)), (pq with low=q))
+            switch(dequeue(pq.medium)){
+                case (Just(x), q) -> (Just((x, Medium)), (pq with medium= q))
+                case (Nothing,_) ->
+                    switch(dequeue(pq.low)){
+                        case (Nothing, _) -> (Nothing, pq)
+                        case (Just(x), q) -> (Just((x, Low)), (pq with low=q))
+                    }
             }
     }
 }
@@ -172,14 +177,22 @@ fun schedule(main){
                   runNext(poll(state.runQ))
               case Fork(f, resume) ->
                   var q = poll(state.runQ);
+                  # f is new fiber, state.prio is the current fiber
                   switch ((f.prio, state.prio)) {
                       case (High, _) ->
+                          # Enqueue the current fiber, run the new fiber
                           var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
                           runFiber(f, qq)
-                      case (_, High) ->
+                      case (Medium, High) ->
+                          # Enqueue the new fiber, run the current fiber
                           var qq = fiberEnqueue(fiber0ToFiber(f), q);
                           resume((), (state with runQ = qq))
+                      case (Medium, _) ->
+                          # Enqueue the new fiber, run the current fiber
+                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
+                          runFiber(f, qq)
                       case (_,_) ->
+                          # Enqueue the current fiber, run the new fiber
                           var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
                           runFiber(f, qq)
                   }
@@ -187,7 +200,8 @@ fun schedule(main){
                   var currentTime = clientTimeMilliseconds();
                   var buffer = switch(state.prio){
                       case High -> 400
-                      case Low -> 200
+                      case Medium ->200
+                      case Low -> 100
                   };
                   if (currentTime - state.startTime <= buffer) resume((), state)
                   else{
@@ -338,6 +352,7 @@ fun buttonPressed(){
     var f = setUpLineDrawing(getValueFromSelection("line-color"));
     switch(prio){
         case "High" -> println("enqueue high"); sysEnqueue(makeFiber(High, f))
+        case "Medium" -> println("enqueue medium"); sysEnqueue(makeFiber(Medium, f))
         case "Low" -> println("enqueue low"); sysEnqueue(makeFiber(Low, f))
         case _ -> ()
     }
@@ -418,6 +433,7 @@ fun main_page(_){
             </select>
             <select id="prio">
                 <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
                 <option value="High">High</option>
             </select>
         </div>

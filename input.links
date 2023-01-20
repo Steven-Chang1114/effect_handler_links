@@ -26,7 +26,7 @@ fun manager() client {
     manager()
 } 
 
-fun mainPage() {
+fun mainPage() { 
     var p = spawnClient { 
         useState(manager)
     };
