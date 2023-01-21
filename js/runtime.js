@@ -44,16 +44,19 @@ const SystemQueue = (function(){
         return temp;
     }
 
-    function length(){
-        return _$List.length(queue);
-    }
+    // function length(){
+    //     return _$List.length(queue);
+    // }
+
+    // return { "enqueue": enqueue
+    //        , "dequeue": dequeue
+    //        , "length" : length }
 
     return { "enqueue": enqueue
-           , "dequeue": dequeue
-           , "length" : length }
+           , "dequeue": dequeue}
 
 }());
 
 const sysEnqueue = _$Links.kify(SystemQueue.enqueue);
 const sysDequeue = _$Links.kify(SystemQueue.dequeue);
-const sysQueueLength = _$Links.kify(SystemQueue.length);
+// const sysQueueLength = _$Links.kify(SystemQueue.length);
