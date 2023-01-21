@@ -352,6 +352,7 @@ fun buttonPressed(){
     var f = setUpLineDrawing(getValueFromSelection("line-color"));
     switch(prio){
         case "High" -> println("enqueue high"); sysEnqueue(makeFiber(High, f))
+        case "Medium" -> println("enqueue medium"); sysEnqueue(makeFiber(Medium, f))
         case "Low" -> println("enqueue low"); sysEnqueue(makeFiber(Low, f))
         case _ -> ()
     }
@@ -432,6 +433,7 @@ fun main_page(_){
             </select>
             <select id="prio">
                 <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
                 <option value="High">High</option>
             </select>
         </div>
@@ -449,7 +451,7 @@ fun main_page(_){
 sig main: () ~> ()
 fun main() {
     addRoute("/", main_page);
-    addStaticRoute("/examples/handlers/js", "examples/handlers/js", [("js", "text/javascript")]);
+    addStaticRoute("/js", "js", [("js", "text/javascript")]);
 
     servePages()
 }
