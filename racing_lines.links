@@ -1,3 +1,5 @@
+import Scheduler;
+
 typename Canvas = ();
 alien javascript "js/canvas.js" {
     drawUnit: (Int, Int, String, Canvas) ~> ();
@@ -12,6 +14,7 @@ alien javascript "js/runtime.js" {
 }
 
 typename Point = (x:Int, y:Int);
+
 typename Queue(a) = (rear: [a], front: [a]);
 typename PrioQueue(a) = (high: Queue(a), medium: Queue(a), low: Queue(a));
 typename Priority = [|High|Medium|Low|];
@@ -19,8 +22,6 @@ typename Fiber0(e::Eff) = (prio: Priority, f: () {Fork: (Fiber0({ |e})) => (), Y
 typename SchedulerState(a) = (runQ: PrioQueue(a), prio: Priority, startTime: Int);
 typename Fiber(e::Eff) = (prio:Priority, f: (SchedulerState(Fiber({ |e}))) ~e~> ());
 typename FiberQueue(e::Eff) = PrioQueue(Fiber({ |e}));
-
-
 
 var colors = ["green", "red", "blue", "yellow"];
 var priorities = [High, High, Low, Low];
@@ -97,11 +98,6 @@ fun emptyQueue(){
 
 fun emptyPrioQueue(){
     (high= emptyQueue(), medium=emptyQueue(), low=emptyQueue())
-}
-
-sig queueLength: (Queue(a)) -> Int
-fun queueLength(q){
-    length(q.rear) + length(q.front)
 }
 
 sig fiberQueueLength: (FiberQueue({ |e}))  -> Int
