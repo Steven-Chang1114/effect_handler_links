@@ -1,11 +1,11 @@
 
 
-function systemYield(f, kappa){
-    window.requestAnimationFrame(function(){
-        return f(_$Constants.UNIT, _$K.idy);
-    });
-    return _$Constants.UNIT;
-}
+// function systemYield(f, kappa){
+//     window.requestAnimationFrame(function(){
+//         return f(_$Constants.UNIT, _$K.idy);
+//     });
+//     return _$Constants.UNIT;
+// }
 
 function delayExecution(delay, kappa){
     window.setTimeout(function(){return _$K.yield(kappa, _$Constants.UNIT);}, delay);
