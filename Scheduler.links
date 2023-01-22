@@ -85,7 +85,7 @@ fun emptyPrioQueue(){
 
 sig fiberQueueLength: (FiberQueue({ |e}))  -> Int
 fun fiberQueueLength(q){
-    length(q.low.rear) + length(q.high.front) + length(q.high.rear) + length(q.low.front)
+    length(q.low.rear) + length(q.high.front) + length(q.medium.front) + length(q.medium.rear) +length(q.high.rear) + length(q.low.front)
 }
 
 sig fork : (Fiber0({ |e})) {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ()
