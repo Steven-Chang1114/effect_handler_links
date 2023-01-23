@@ -85,7 +85,7 @@ fun emptyPrioQueue(){
 
 sig fiberQueueLength: (FiberQueue({ |e}))  -> Int
 fun fiberQueueLength(q){
-    length(q.low.rear) + length(q.high.front) + length(q.medium.front) + length(q.medium.rear) +length(q.high.rear) + length(q.low.front)
+    length(q.low.rear) + length(q.high.front) + length(q.high.rear) + length(q.medium.front) + length(q.medium.rear) + length(q.low.front)
 }
 
 sig fork : (Fiber0({ |e})) {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ()
@@ -144,26 +144,11 @@ fun schedule(main){
               case x ->
                   runNext(poll(state.runQ))
               case <Fork(f) => resume> ->
+                    print("fork");
                   var q = poll(state.runQ);
                   # f is new fiber, state.prio is the current fiber
-                  switch ((f.prio, state.prio)) {
-                      case (High, _) ->
-                          # Enqueue the current fiber, run the new fiber
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
-                          runFiber(f, qq)
-                      case (Medium, High) ->
-                          # Enqueue the new fiber, run the current fiber
-                          var qq = fiberEnqueue(fiber0ToFiber(f), q);
-                          resume((), (state with runQ = qq))
-                      case (Medium, _) ->
-                          # Enqueue the new fiber, run the current fiber
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
-                          runFiber(f, qq)
-                      case (_,_) ->
-                          # Enqueue the current fiber, run the new fiber
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
-                          runFiber(f, qq)
-                  }
+                var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
+                runFiber(f, qq)
               case <Yield => resume> ->
                   var currentTime = clientTimeMilliseconds();
                   var buffer = switch(state.prio){

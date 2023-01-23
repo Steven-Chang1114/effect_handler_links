@@ -1,5 +1,7 @@
 import Scheduler;
 
+# Necessary functions for users: schedule, makeFiber, sysEnqueue, yield, fork
+
 typename Canvas = ();
 alien javascript "js/canvas.js" {
     drawUnit: (Int, Int, String, Canvas) ~> ();
@@ -10,7 +12,8 @@ alien javascript "js/canvas.js" {
 typename Point = (x:Int, y:Int);
 
 var colors = ["green", "red", "blue", "yellow"];
-var priorities = [High, High, Low, Low];
+#var priorities = [High, High, Low, Low];
+var priorities = [];
 
 # Page Functionality
 
@@ -81,27 +84,12 @@ fun drawHorizontalLine(start, end, color){
     aux(absolute(diff.x), start)
 }
 
-sig drawVerticalLine: (Point, Point, String) {Yield:() |e}~> ()
-fun drawVerticalLine(start, end, color){
-    var div = getNodeById("box");
-    var context = jsGetContext2D(div);
-    var diff = difference(end, start);
-    fun aux(n, start){
-        drawCustomUnit(start.x, start.y, 5, 1, color, context);
-        Scheduler.yield();
-        Scheduler.delayExecution(100);
-        if (n > 0) aux(n -1, (x = start.x, y = start.y + (diff.y / absolute(diff.y))))
-        else ()
-    }
-    aux(absolute(diff.y), start)
-}
-
 sig drawLineInColor: (Point, Point, String) {Yield:() |e}~> ()
 fun drawLineInColor(start, end, color){
     println("start drawing " ^^ color ^^ ", yield.");
-    Scheduler.yield();
+    # Scheduler.yield();
     drawHorizontalLine((x=start.x, y=start.y), (x=end.x, y=end.y), color);
-    Scheduler.yield();
+    # Scheduler.yield();
     println("finish drawing " ^^ color)
 }
 
