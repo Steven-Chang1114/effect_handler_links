@@ -138,28 +138,49 @@ fun schedule(main){
       }
 
       fun runFiber(fiber, runQ){
-          #println("runQ: " ^^ intToString(fiberQueueLength(runQ)));
+          println("runQ: " ^^ intToString(fiberQueueLength(runQ)));
           #dump(self());
           handle(fiber.f()) ( state <- (prio=fiber.prio, runQ=runQ, startTime=clientTimeMilliseconds()) ){
               case x ->
+                    print("RUN");
                   runNext(poll(state.runQ))
               case <Fork(f) => resume> ->
                     print("fork");
-                  var q = poll(state.runQ);
-                  # f is new fiber, state.prio is the current fiber
-                var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
-                runFiber(f, qq)
+                    var q = poll(state.runQ);
+                    # f is new fiber, state.prio is the current fiber
+                    switch ((f.prio, state.prio)) {
+                      case (High, _) ->
+                          # Enqueue the current fiber, run the new fiber
+                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
+                          runFiber(f, qq)
+                      case (Medium, High) ->
+                          # Enqueue the new fiber, run the current fiber
+                          var qq = fiberEnqueue(fiber0ToFiber(f), state.runQ);
+                          resume((), (state with runQ = qq))
+                      case (Medium, _) ->
+                          # Enqueue the new fiber, run the current fiber
+                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
+                          runFiber(f, qq)
+                      case (_,_) ->
+                          # Enqueue the current fiber, run the new fiber
+                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
+                          runFiber(f, qq)
+                    }
               case <Yield => resume> ->
+                    print("YIELD");
                   var currentTime = clientTimeMilliseconds();
                   var buffer = switch(state.prio){
                       case High -> 400
                       case Medium ->200
                       case Low -> 100
                   };
-                  if (currentTime - state.startTime <= buffer) resume((), state)
-                  else{
+                  if (currentTime - state.startTime <= buffer) {
+                    print("RESUME"); 
+                    resume((), state)
+                  } else{
+                    print("SWITCH");
                       var q = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
-                      runNext(poll(q))
+                      runNext(q)
                   }
           }
       }
