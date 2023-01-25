@@ -8,7 +8,7 @@ typename Queue(a) = (rear: [a], front: [a]);
 typename PrioQueue(a) = (high: Queue(a), medium: Queue(a), low: Queue(a), alt: Queue(a));
 typename Priority = [|High|Medium|Low|];
 typename Fiber0(e::Eff) = (prio: Priority, f: () {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ());
-typename SchedulerState(a) = (runQ: PrioQueue(a), prio: Priority, startTime: Int);
+typename SchedulerState(a) = (runQ: PrioQueue(a), prio: Priority, count: Int);
 typename Fiber(e::Eff) = (prio:Priority, f: (SchedulerState(Fiber({ |e}))) ~e~> ());
 typename FiberQueue(e::Eff) = PrioQueue(Fiber({ |e}));
 
@@ -30,49 +30,9 @@ fun dequeue(q){
     }
 }
 
-sig priorityEnqueue: (a, Priority, PrioQueue(a)) ~> PrioQueue(a)
-fun priorityEnqueue(x, prio, pq){
-    switch(prio){
-        case High -> (pq with high = enqueue(x, pq.high))
-        case Medium -> (pq with medium = enqueue(x, pq.medium))
-        case Low -> (pq with low = enqueue(x, pq.low))
-    }
-}
-
-sig priorityDequeue: (PrioQueue(a)) ~> (Maybe((a, Priority)), PrioQueue(a) )
-fun priorityDequeue(pq){
-    switch(dequeue(pq.high)){
-        case (Just(x), q) -> (Just((x, High)), (pq with high= q))
-        case (Nothing,_) ->
-            switch(dequeue(pq.medium)){
-                case (Just(x), q) -> (Just((x, Medium)), (pq with medium= q))
-                case (Nothing,_) ->
-                    switch(dequeue(pq.low)){
-                        case (Nothing, _) -> print("Dequeue empty"); (Nothing, pq)
-                        case (Just(x), q) -> (Just((x, Low)), (pq with low=q))
-                    }
-            }
-    }
-}
-
-sig fiberEnqueue: (Fiber({ |e}), FiberQueue({ |e})) ~> FiberQueue({ |e})
-fun fiberEnqueue(f, q){
-    priorityEnqueue(f, f.prio, q)
-}
-
 sig fiberAltEnqueue: (Fiber({ |e}), FiberQueue({ |e})) ~> FiberQueue({ |e})
 fun fiberAltEnqueue(f, pq){
     (pq with alt = enqueue(f, pq.alt))
-}
-
-sig fiberBulkEnqueue: ([Fiber({ |e})], FiberQueue({ |e})) ~> FiberQueue({ |e})
-fun fiberBulkEnqueue(fibers, q){
-    switch(fibers){
-        case [] -> q
-        case x::xs ->
-            var pq = fiberEnqueue(x, q);
-            fiberBulkEnqueue(xs, pq)
-    }
 }
 
 sig fiberBulkAltEnqueue: ([Fiber({ |e})], FiberQueue({ |e})) ~> FiberQueue({ |e})
@@ -83,11 +43,6 @@ fun fiberBulkAltEnqueue(fibers, q){
             var pq = fiberAltEnqueue(x, q);
             fiberBulkAltEnqueue(xs, pq)
     }
-}
-
-sig fiberDequeue: (FiberQueue({ |e})) ~> (Maybe((Fiber({ |e}), Priority)), FiberQueue({ |e}))
-fun fiberDequeue(q){
-    priorityDequeue(q)
 }
 
 #sig fiberAltDequeue: (FiberQueue({ |e})) ~> (Maybe((Fiber({ |e}), Priority)), FiberQueue({ |e}))
@@ -134,14 +89,7 @@ fun schedule(fib){
 
     #sig makeSchedulerState: (Priority, PrioQueue(a)) ~> SchedulerState(a)
     fun makeSchedulerState(prio, q){
-        (runQ = q, prio = prio, startTime = clientTimeMilliseconds())
-    }
-
-    fun runNext(q){
-        switch(fiberDequeue(q)){
-            case (Nothing, _) -> ()
-            case (Just((fiber, prio)), q) -> fiber.f(makeSchedulerState(prio, q))
-        }
+        (runQ = q, prio = prio, count = 0)
     }
 
     fun runNextAlt(q){
@@ -161,12 +109,6 @@ fun schedule(fib){
           (prio = fiber.prio, f = fun(state) { runFiber(fiber, state.runQ ) })
       }
 
-      #sig poll: (FiberQueue({ |e})) ~> FiberQueue({ |e})
-      fun poll(q){
-          var enqueue = map(fiber0ToFiber, sysDequeue());
-          fiberBulkEnqueue(enqueue, q)
-      }
-
       #sig pollAlt: (FiberQueue({ |e})) ~> FiberQueue({ |e})
       fun pollAlt(q){
           var enqueue = map(fiber0ToFiber, sysDequeue());
@@ -176,62 +118,62 @@ fun schedule(fib){
       fun runFiber(fiber, runQ){
           println("runQ: " ^^ intToString(fiberQueueLength(runQ)));
           #dump(self());
-          handle(fiber.f()) ( state <- (prio=fiber.prio, runQ=runQ, startTime=clientTimeMilliseconds()) ){
+          handle(fiber.f()) ( state <- (prio=fiber.prio, runQ=runQ, count = 0) ){
               case x ->
                     print("RETURN");
-                  runNext(poll(state.runQ))
+                  runNextAlt(pollAlt(state.runQ))
               case <Fork(f) => resume> ->
                     print("fork");
-                    var q = poll(state.runQ);
+                    var q = pollAlt(state.runQ);
                     # f is new fiber, state.prio is the current fiber
                     switch ((f.prio, state.prio)) {
                       case (High, _) ->
                           # Enqueue the current fiber, run the new fiber
                           print("High fiber enqueued");
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
+                          var qq = fiberAltEnqueue(resumptionToFiber(resume, state.prio), q);
                           runFiber(f, qq)
                       case (Medium, High) ->
                         print("Medium high fiber enqueued");
                           # Enqueue the new fiber, run the current fiber
-                          var qq = fiberEnqueue(fiber0ToFiber(f), q);
+                          var qq = fiberAltEnqueue(fiber0ToFiber(f), q);
                           resume((), (state with runQ = qq))
                       case (Medium, _) ->
                         print("Medium fiber enqueued");
                           # Enqueue the new fiber, run the current fiber
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
+                          var qq = fiberAltEnqueue(resumptionToFiber(resume, state.prio), q);
                           runFiber(f, qq)
                       case (_, High) ->
                           # Enqueue the new fiber, run the current fiber
                           print("Low High fiber enqueued");
-                          var qq = fiberEnqueue(fiber0ToFiber(f), q);
+                          var qq = fiberAltEnqueue(fiber0ToFiber(f), q);
                           resume((), (state with runQ = qq))
                       case (_, Medium) ->
                           # Enqueue the new fiber, run the current fiber
                           print("Low Medium fiber enqueued");
-                          var qq = fiberEnqueue(fiber0ToFiber(f), q);
+                          var qq = fiberAltEnqueue(fiber0ToFiber(f), q);
                           resume((), (state with runQ = qq))
                       case (_,_) ->
                           # Enqueue the current fiber, run the new fiber
                           print("Low fiber enqueued");
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
+                          var qq = fiberAltEnqueue(resumptionToFiber(resume, state.prio), q);
                           runFiber(f, qq)
                     }
               case <Yield => resume> ->
                     #print("YIELD");
-                  var currentTime = clientTimeMilliseconds();
-                  var buffer = switch(state.prio){
-                      case High -> 400
-                      case Medium -> 200
-                      case Low -> 100
+                  var step = switch(state.prio){
+                      case High -> 40
+                      case Medium ->20
+                      case Low -> 10
                   };
-                  #print("TIME: " ^^ intToString(currentTime - state.startTime) ^^ "," ^^ intToString(buffer));
-                  if (currentTime - state.startTime <= buffer) {
+                  var c = state.count + 1;
+
+                  if (c < step) {
                     #print("RESUME"); 
-                    resume((), state)
+                    resume((), (state with count = c))
                   } else{
                     #print("SWITCH");
-                      var q = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
-                      runNext(poll(q))
+                      var q = fiberAltEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
+                      runNextAlt(pollAlt(q))
                   }
           }
       }
