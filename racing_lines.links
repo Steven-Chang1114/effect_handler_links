@@ -4,6 +4,11 @@ import LineDrawer;
 
 # Necessary functions for users: schedule, makeFiber, sysEnqueue, yield, fork
 
+# User defined scheduler
+
+
+# Page functionality
+
 typename Canvas = ();
 alien javascript "js/canvas.js" {
     drawCustomUnit: (Int, Int, Int, Int, String, Canvas) ~> ();

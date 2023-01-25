@@ -5,7 +5,7 @@ alien javascript "js/runtime.js" {
 }
 
 typename Queue(a) = (rear: [a], front: [a]);
-typename PrioQueue(a) = (high: Queue(a), medium: Queue(a), low: Queue(a), alt: Queue(a));
+typename PrioQueue(a) = (alt: Queue(a));
 typename Priority = [|High|Medium|Low|];
 typename Fiber0(e::Eff) = (prio: Priority, f: () {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ());
 typename SchedulerState(a) = (runQ: PrioQueue(a), prio: Priority, count: Int);
@@ -58,12 +58,12 @@ fun emptyQueue(){
 }
 
 fun emptyPrioQueue(){
-    (high= emptyQueue(), medium=emptyQueue(), low=emptyQueue(), alt=emptyQueue())
+    (alt=emptyQueue())
 }
 
 sig fiberQueueLength: (FiberQueue({ |e}))  -> Int
 fun fiberQueueLength(q){
-    length(q.low.rear) + length(q.high.front) + length(q.high.rear) + length(q.medium.front) + length(q.medium.rear) + length(q.low.front)
+    length(q.alt.rear) + length(q.alt.front)
 }
 
 sig fork : (Fiber0({ |e})) {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ()

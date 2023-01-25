@@ -5,7 +5,7 @@ alien javascript "js/runtime.js" {
 }
 
 typename Queue(a) = (rear: [a], front: [a]);
-typename PrioQueue(a) = (high: Queue(a), medium: Queue(a), low: Queue(a), alt: Queue(a));
+typename PrioQueue(a) = (high: Queue(a), medium: Queue(a), low: Queue(a));
 typename Priority = [|High|Medium|Low|];
 typename Fiber0(e::Eff) = (prio: Priority, f: () {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ());
 typename SchedulerState(a) = (runQ: PrioQueue(a), prio: Priority, startTime: Int);
@@ -60,11 +60,6 @@ fun fiberEnqueue(f, q){
     priorityEnqueue(f, f.prio, q)
 }
 
-sig fiberAltEnqueue: (Fiber({ |e}), FiberQueue({ |e})) ~> FiberQueue({ |e})
-fun fiberAltEnqueue(f, pq){
-    (pq with alt = enqueue(f, pq.alt))
-}
-
 sig fiberBulkEnqueue: ([Fiber({ |e})], FiberQueue({ |e})) ~> FiberQueue({ |e})
 fun fiberBulkEnqueue(fibers, q){
     switch(fibers){
@@ -75,27 +70,9 @@ fun fiberBulkEnqueue(fibers, q){
     }
 }
 
-sig fiberBulkAltEnqueue: ([Fiber({ |e})], FiberQueue({ |e})) ~> FiberQueue({ |e})
-fun fiberBulkAltEnqueue(fibers, q){
-    switch(fibers){
-        case [] -> q
-        case x::xs ->
-            var pq = fiberAltEnqueue(x, q);
-            fiberBulkAltEnqueue(xs, pq)
-    }
-}
-
 sig fiberDequeue: (FiberQueue({ |e})) ~> (Maybe((Fiber({ |e}), Priority)), FiberQueue({ |e}))
 fun fiberDequeue(q){
     priorityDequeue(q)
-}
-
-#sig fiberAltDequeue: (FiberQueue({ |e})) ~> (Maybe((Fiber({ |e}), Priority)), FiberQueue({ |e}))
-fun fiberAltDequeue(pq){
-    switch(dequeue(pq.alt)){
-        case (Nothing, _) -> print("Dequeue empty"); (Nothing, pq)
-        case (Just(x), q) -> (Just((x, x.prio)), (pq with alt=q))
-    }
 }
 
 fun emptyQueue(){
@@ -103,7 +80,7 @@ fun emptyQueue(){
 }
 
 fun emptyPrioQueue(){
-    (high= emptyQueue(), medium=emptyQueue(), low=emptyQueue(), alt=emptyQueue())
+    (high= emptyQueue(), medium=emptyQueue(), low=emptyQueue())
 }
 
 sig fiberQueueLength: (FiberQueue({ |e}))  -> Int
@@ -144,13 +121,6 @@ fun schedule(fib){
         }
     }
 
-    fun runNextAlt(q){
-        switch(fiberAltDequeue(q)){
-            case (Nothing, _) -> ()
-            case (Just((fiber, prio)), q) -> fiber.f(makeSchedulerState(prio, q))
-        }
-    }
-
     fun resumptionToFiber(resume, prio){
         (prio = prio, f = fun(state) { resume((), state) })
     }
@@ -165,12 +135,6 @@ fun schedule(fib){
       fun poll(q){
           var enqueue = map(fiber0ToFiber, sysDequeue());
           fiberBulkEnqueue(enqueue, q)
-      }
-
-      #sig pollAlt: (FiberQueue({ |e})) ~> FiberQueue({ |e})
-      fun pollAlt(q){
-          var enqueue = map(fiber0ToFiber, sysDequeue());
-          fiberBulkAltEnqueue(enqueue, q)
       }
 
       fun runFiber(fiber, runQ){
