@@ -1,0 +1,53 @@
+typename Point = (x:Int, y:Int);
+
+sig difference: (Point, Point) -> Point
+fun difference(a, b){
+    (x = a.x - b.x, y= a.y - b.y)
+}
+
+sig absolute: (Int) -> Int
+fun absolute(n){
+    if(n < 0){
+        n * -1
+    } else{
+        n
+    }
+}
+
+sig parseInt: (String) ~> Maybe(Int)
+fun parseInt(n){
+    if (n =~ /^[0-9]+$/) {
+        Just(stringToInt(n))
+    } else{
+        Nothing
+    }
+}
+
+sig setValue: (a, String, (a) ~> String) ~%~> ()
+fun setValue(newVal, id, toString){
+    ignore(domSetAttributeFromRef(getNodeById(id), "value", toString(newVal)))
+}
+
+sig getValue: (String) ~> String
+fun getValue(id){
+    domGetAttributeFromRef(getNodeById(id), "value")
+}
+
+fun updatePoints(startx, starty, endx, endy){
+    setValue(startx, "start-x", intToString);
+    setValue(starty, "start-y", intToString);
+    setValue(endx, "end-x", intToString);
+    setValue(endy, "end-y", intToString)
+}
+
+sig getPoints: () ~> Maybe((Point, Point))
+fun getPoints(){
+    var startx = parseInt(getValue("start-x"));
+    var starty = parseInt(getValue("start-y"));
+    var endx = parseInt(getValue("end-x"));
+    var endy = parseInt(getValue("end-y"));
+    switch((startx, starty, endx, endy)){
+        case (Just(sx), Just(sy), Just(ex), Just(ey)) -> Just((x = sx, y = sy), (x = ex, y = ey))
+        case (_, _, _, _) -> Nothing
+    }
+}

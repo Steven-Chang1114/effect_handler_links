@@ -1,10 +1,10 @@
 import Scheduler;
+import LineDrawer;
 
 # Necessary functions for users: schedule, makeFiber, sysEnqueue, yield, fork
 
 typename Canvas = ();
 alien javascript "js/canvas.js" {
-    drawUnit: (Int, Int, String, Canvas) ~> ();
     drawCustomUnit: (Int, Int, Int, Int, String, Canvas) ~> ();
     getValueFromSelection: (String) ~> String;
 }
@@ -17,72 +17,20 @@ var priorities = [];
 
 # Page Functionality
 
-sig difference: (Point, Point) -> Point
-fun difference(a, b){
-    (x = a.x - b.x, y= a.y - b.y)
-}
-
-sig absolute: (Int) -> Int
-fun absolute(n){
-    if(n < 0){
-        n * -1
-    } else{
-        n
-    }
-}
-
-sig parseInt: (String) ~> Maybe(Int)
-fun parseInt(n){
-    if (n =~ /^[0-9]+$/) {
-        Just(stringToInt(n))
-    } else{
-        Nothing
-    }
-}
-
-sig setValue: (a, String, (a) ~> String) ~%~> ()
-fun setValue(newVal, id, toString){
-    ignore(domSetAttributeFromRef(getNodeById(id), "value", toString(newVal)))
-}
-
-sig getValue: (String) ~> String
-fun getValue(id){
-    domGetAttributeFromRef(getNodeById(id), "value")
-}
-
-fun updatePoints(startx, starty, endx, endy){
-    setValue(startx, "start-x", intToString);
-    setValue(starty, "start-y", intToString);
-    setValue(endx, "end-x", intToString);
-    setValue(endy, "end-y", intToString)
-}
-
-sig getPoints: () ~> Maybe((Point, Point))
-fun getPoints(){
-    var startx = parseInt(getValue("start-x"));
-    var starty = parseInt(getValue("start-y"));
-    var endx = parseInt(getValue("end-x"));
-    var endy = parseInt(getValue("end-y"));
-    switch((startx, starty, endx, endy)){
-        case (Just(sx), Just(sy), Just(ex), Just(ey)) -> Just((x = sx, y = sy), (x = ex, y = ey))
-        case (_, _, _, _) -> Nothing
-    }
-}
-
 sig drawHorizontalLine: (Point, Point, String) {Yield:() |e}~> ()
 fun drawHorizontalLine(start, end, color){
     var div = getNodeById("box");
     var context = jsGetContext2D(div);
-    var diff = difference(end, start);
+    var diff = LineDrawer.difference(end, start);
     fun aux(n, start){
         drawCustomUnit(start.x, start.y, 1, 25, color, context);
         Scheduler.yield();
         #print("DELAY " ^^ intToString(n) ^^ ", " ^^ intToString(start.x) ^^ ", "  ^^intToString(start.y));
         Scheduler.delayExecution(10);
-        if (n > 0) aux(n -1, (x = start.x + (diff.x / absolute(diff.x)), y = start.y))
+        if (n > 0) aux(n -1, (x = start.x + (diff.x / LineDrawer.absolute(diff.x)), y = start.y))
         else ()
     }
-    aux(absolute(diff.x), start)
+    aux(LineDrawer.absolute(diff.x), start)
 }
 
 sig drawLineInColor: (Point, Point, String) {Yield:() |e}~> ()
@@ -92,27 +40,16 @@ fun drawLineInColor(start, end, color){
     println("finish drawing " ^^ color)
 }
 
-sig addStringToNode: (String, String) ~> ()
-fun addStringToNode(string, id){
-    var node = getNodeById(id);
-    appendChildren(<#><p style="text-align: center;"> {stringToXml(string)} </p></#>, node)
-}
-
-sig prepareDrawingFunction: (Point, Point, String) ~> () {Yield:() |e}~> ()
-fun prepareDrawingFunction(start, end, color){
-    fun(){
-        drawLineInColor(start, end, color)
-    }
-}
-
 sig setUpLineDrawing: (String) ~> () {Yield:() |e}~> ()
 fun setUpLineDrawing(color){
-    var points = getPoints();
+    var points = LineDrawer.getPoints();
     switch(points){
         case Nothing -> fun(){}
         case Just((start, end)) -> {
-            updatePoints(start.x, start.y + 40, end.x , end.y + 40);
-            prepareDrawingFunction(start, end, color)
+            LineDrawer.updatePoints(start.x, start.y + 40, end.x , end.y + 40);
+            fun(){
+                drawLineInColor(start, end, color)
+            }
         }
     }
 }
