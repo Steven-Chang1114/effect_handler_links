@@ -26,7 +26,7 @@ fun drawHorizontalLine(start, end, color){
         drawCustomUnit(start.x, start.y, 1, 25, color, context);
         Scheduler.yield();
         #print("DELAY " ^^ intToString(n) ^^ ", " ^^ intToString(start.x) ^^ ", "  ^^intToString(start.y));
-        Scheduler.delayExecution(10);
+        Scheduler.delayExecution(30);
         if (n > 0) aux(n -1, (x = start.x + (diff.x / LineDrawer.absolute(diff.x)), y = start.y))
         else ()
     }
