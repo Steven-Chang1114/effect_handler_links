@@ -77,6 +77,7 @@ fun drawHorizontalLine(start, end, color){
     fun aux(n, start){
         drawCustomUnit(start.x, start.y, 1, 25, color, context);
         Scheduler.yield();
+        #print("DELAY " ^^ intToString(n) ^^ ", " ^^ intToString(start.x) ^^ ", "  ^^intToString(start.y));
         Scheduler.delayExecution(10);
         if (n > 0) aux(n -1, (x = start.x + (diff.x / absolute(diff.x)), y = start.y))
         else ()
@@ -87,9 +88,7 @@ fun drawHorizontalLine(start, end, color){
 sig drawLineInColor: (Point, Point, String) {Yield:() |e}~> ()
 fun drawLineInColor(start, end, color){
     println("start drawing " ^^ color ^^ ", yield.");
-    Scheduler.yield();
     drawHorizontalLine((x=start.x, y=start.y), (x=end.x, y=end.y), color);
-    Scheduler.yield();
     println("finish drawing " ^^ color)
 }
 
@@ -118,24 +117,27 @@ fun setUpLineDrawing(color){
     }
 }
 
+fun start(){
+    Scheduler.fork(Scheduler.makeFiber(Low, Scheduler.forever));
+    fun aux(colors, prios){
+        switch((colors, prios)){
+            case ([],[]) -> ()
+            case (x::xs, y::ys) -> Scheduler.fork(Scheduler.makeFiber(y, setUpLineDrawing(x))); aux(xs, ys)
+            case (_, _) -> ()
+        }
+    }
+    aux(colors, priorities)
+}
 
 fun buttonPressed(){
     var prio = getValueFromSelection("prio");
     var f = setUpLineDrawing(getValueFromSelection("line-color"));
     switch(prio){
-        case "High" -> println("enqueue high"); Scheduler.fork(Scheduler.makeFiber(High, f))
-        case "Medium" -> println("enqueue medium"); Scheduler.fork(Scheduler.makeFiber(Medium, f))
-        case "Low" -> println("enqueue low"); Scheduler.fork(Scheduler.makeFiber(Low, f))
+        case "High" -> println("enqueue high"); Scheduler.sysEnqueue(Scheduler.makeFiber(High, f))
+        case "Medium" -> println("enqueue low"); Scheduler.sysEnqueue(Scheduler.makeFiber(Medium, f))
+        case "Low" -> println("enqueue low"); Scheduler.sysEnqueue(Scheduler.makeFiber(Low, f))
         case _ -> ()
     }
-}
-
-fun start(){
-    #Scheduler.fork(Scheduler.makeFiber(Low, Scheduler.forever));
-    receive {
-        case ForkFiber -> buttonPressed()
-    };
-    start()
 }
 
 # Web interface
@@ -217,7 +219,7 @@ fun main_page(_){
                 <option value="High">High</option>
             </select>
         </div>
-        <button class="block button center" l:onclick="{pId ! ForkFiber}">Draw Line</button>
+        <button class="block button center" l:onclick="{buttonPressed()}">Draw Line</button>
         <div id="data" display="none">
             <div id="start-x" value="10"></div>
             <div id="start-y" value="10"></div>
