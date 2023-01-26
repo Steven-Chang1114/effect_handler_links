@@ -30,9 +30,9 @@ fun drawHorizontalLine(start, end, color){
     var diff = LineDrawer.difference(end, start);
     fun aux(n, start){
         drawCustomUnit(start.x, start.y, 1, 25, color, context);
-        Scheduler.yield();
+        Scheduler2.yield();
         #print("DELAY " ^^ intToString(n) ^^ ", " ^^ intToString(start.x) ^^ ", "  ^^intToString(start.y));
-        Scheduler.delayExecution(10);
+        Scheduler2.delayExecution(10);
         if (n > 0) aux(n -1, (x = start.x + (diff.x / LineDrawer.absolute(diff.x)), y = start.y))
         else ()
     }
@@ -61,11 +61,11 @@ fun setUpLineDrawing(color){
 }
 
 fun start(){
-    Scheduler.fork(Scheduler.makeFiber(Low, Scheduler.forever));
+    Scheduler2.fork(Scheduler2.makeFiber(Low, Scheduler2.forever));
     fun aux(colors, prios){
         switch((colors, prios)){
             case ([],[]) -> ()
-            case (x::xs, y::ys) -> Scheduler.fork(Scheduler.makeFiber(y, setUpLineDrawing(x))); aux(xs, ys)
+            case (x::xs, y::ys) -> Scheduler2.fork(Scheduler2.makeFiber(y, setUpLineDrawing(x))); aux(xs, ys)
             case (_, _) -> ()
         }
     }
@@ -76,9 +76,9 @@ fun buttonPressed(){
     var prio = getValueFromSelection("prio");
     var f = setUpLineDrawing(getValueFromSelection("line-color"));
     switch(prio){
-        case "High" -> println("enqueue high"); Scheduler.sysEnqueue(Scheduler.makeFiber(High, f))
-        case "Medium" -> println("enqueue low"); Scheduler.sysEnqueue(Scheduler.makeFiber(Medium, f))
-        case "Low" -> println("enqueue low"); Scheduler.sysEnqueue(Scheduler.makeFiber(Low, f))
+        case "High" -> println("enqueue high"); Scheduler2.sysEnqueue(Scheduler2.makeFiber(High, f))
+        case "Medium" -> println("enqueue low"); Scheduler2.sysEnqueue(Scheduler2.makeFiber(Medium, f))
+        case "Low" -> println("enqueue low"); Scheduler2.sysEnqueue(Scheduler2.makeFiber(Low, f))
         case _ -> ()
     }
 }
@@ -88,7 +88,7 @@ fun buttonPressed(){
 sig main_page : (_) ~> Page
 fun main_page(_){
 
-    var pId = spawnClient{Scheduler.schedule(Scheduler.makeFiber(High, start))};
+    var pId = spawnClient{Scheduler2.schedule(Scheduler2.makeFiber(High, start))};
 
     page
     <html>

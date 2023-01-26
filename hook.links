@@ -19,15 +19,15 @@ fun setNumCalc(val) {
 
 fun useState(m) client {
     handle(m())(globalVar <- (num = 0, numCalc = 5)) {
-        case SetNum(val, k) -> k(replaceNode(<div id="num">{intToXml(val)}</div>,getNodeById("num")), 
+        case <SetNum(val) => k> -> k(replaceNode(<div id="num">{intToXml(val)}</div>,getNodeById("num")), 
                                 (globalVar with num = val))
-        case GetNum(k) -> k(globalVar.num, globalVar)
+        case <GetNum => k> -> k(globalVar.num, globalVar)
 
-        case SetNumCalc(val, k) -> k(replaceNode(<div id="numCalc">{intToXml(val)}</div>,getNodeById("numCalc")),
+        case <SetNumCalc(val) => k> -> k(replaceNode(<div id="numCalc">{intToXml(val)}</div>,getNodeById("numCalc")),
                                     (globalVar with numCalc = val))
-        case GetNumCalc(k) -> k(globalVar.numCalc, globalVar)
+        case <GetNumCalc => k> -> k(globalVar.numCalc, globalVar)
 
-        case Return(x) -> x
+        case x -> x
     }
 }
 
