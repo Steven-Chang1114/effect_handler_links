@@ -1,10 +1,12 @@
 import Scheduler;
 import Scheduler2;
 import LineDrawer;
+import Interface;
 
-# Necessary functions for users: schedule, makeFiber, sysEnqueue, yield, fork
-
-# User defined scheduler
+alien javascript "js/runtime.js" {
+    delayExecution: (Int) ~> ();
+    sysEnqueue: (a) ~> ();
+}
 
 
 # Page functionality
@@ -30,9 +32,9 @@ fun drawHorizontalLine(start, end, color){
     var diff = LineDrawer.difference(end, start);
     fun aux(n, start){
         drawCustomUnit(start.x, start.y, 1, 25, color, context);
-        Scheduler.yield();
+        Interface.yield();
         #print("DELAY " ^^ intToString(n) ^^ ", " ^^ intToString(start.x) ^^ ", "  ^^intToString(start.y));
-        Scheduler.delayExecution(10);
+        delayExecution(10);
         if (n > 0) aux(n -1, (x = start.x + (diff.x / LineDrawer.absolute(diff.x)), y = start.y))
         else ()
     }
@@ -61,11 +63,11 @@ fun setUpLineDrawing(color){
 }
 
 fun start(){
-    Scheduler.fork(Scheduler.makeFiber(Low, Scheduler.forever));
+    Interface.fork(Interface.makeFiber(Low, Interface.forever));
     fun aux(colors, prios){
         switch((colors, prios)){
             case ([],[]) -> ()
-            case (x::xs, y::ys) -> Scheduler.fork(Scheduler.makeFiber(y, setUpLineDrawing(x))); aux(xs, ys)
+            case (x::xs, y::ys) -> Interface.fork(Interface.makeFiber(y, setUpLineDrawing(x))); aux(xs, ys)
             case (_, _) -> ()
         }
     }
@@ -76,19 +78,27 @@ fun buttonPressed(){
     var prio = getValueFromSelection("prio");
     var f = setUpLineDrawing(getValueFromSelection("line-color"));
     switch(prio){
-        case "High" -> println("enqueue high"); Scheduler.sysEnqueue(Scheduler.makeFiber(High, f))
-        case "Medium" -> println("enqueue low"); Scheduler.sysEnqueue(Scheduler.makeFiber(Medium, f))
-        case "Low" -> println("enqueue low"); Scheduler.sysEnqueue(Scheduler.makeFiber(Low, f))
+        case "High" -> println("enqueue high"); sysEnqueue(Interface.makeFiber(High, f))
+        case "Medium" -> println("enqueue low"); sysEnqueue(Interface.makeFiber(Medium, f))
+        case "Low" -> println("enqueue low"); sysEnqueue(Interface.makeFiber(Low, f))
         case _ -> ()
     }
 }
 
+fun switchToScheduler1(){
+    print("1111")
+}
+
+fun switchToScheduler2(){
+    print("2222")
+}
+
 # Web interface
 
-sig main_page : (_) ~> Page
-fun main_page(_){
+#sig main_page : (_) ~> Page
+fun main_page(schedule){
 
-    var pId = spawnClient{Scheduler.schedule(Scheduler.makeFiber(High, start))};
+    var pId = spawnClient{schedule(Interface.makeFiber(High, start))};
 
     page
     <html>
@@ -104,6 +114,10 @@ fun main_page(_){
             width: 400px;
             height: 600px;
             border: solid 1px #aaa;
+        }}
+        a {{
+            display:flex;
+            justify-content: center; 
         }}
         .buttons{{
             display:flex;
@@ -163,6 +177,8 @@ fun main_page(_){
             </select>
         </div>
         <button class="block button center" l:onclick="{buttonPressed()}">Draw Line</button>
+        <a href="/scheduler1.links">Scheduler 1</a>
+        <a href="/scheduler2.links">Scheduler 2</a>
         <div id="data" display="none">
             <div id="start-x" value="10"></div>
             <div id="start-y" value="10"></div>
@@ -175,7 +191,7 @@ fun main_page(_){
 
 sig main: () ~> ()
 fun main() {
-    addRoute("/", main_page);
+    addRoute("/", fun(_) {main_page(Scheduler.schedule)});
     addStaticRoute("/js", "js", [("js", "text/javascript")]);
 
     servePages()

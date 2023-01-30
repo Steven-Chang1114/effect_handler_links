@@ -1,0 +1,23 @@
+typename Queue(a) = (rear: [a], front: [a]);
+
+fun emptyQueue(){
+    (rear=[], front=[])
+}
+
+sig enqueue: (a, Queue(a)) -> Queue(a)
+fun enqueue(x, q){
+    (q with rear=x::q.rear)
+}
+
+sig dequeue: (Queue(a)) ~> (Maybe(a), Queue(a))
+fun dequeue(q){
+    switch(q) {
+        case (rear=[], front=[]) -> (Nothing, q)
+        case (rear=xs, front=[]) ->
+          var q0 = (rear=[], front=reverse(xs));
+          dequeue(q0)
+        case (rear=ys, front=(x :: xs)) ->
+          var q0 = (rear=ys, front=xs);
+          (Just(x), q0)
+    }
+}

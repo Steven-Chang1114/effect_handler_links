@@ -1,3 +1,6 @@
+typename Priority = [|High|Medium|Low|];
+typename Fiber0(e::Eff) = (prio: Priority, f: () {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ());
+
 sig fork : (Fiber0({ |e})) {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ()
 fun fork(f){
     do Fork(f)
@@ -7,3 +10,11 @@ sig yield: () {Yield:() |e}~> ()
 fun yield(){
     do Yield
 }
+
+sig makeFiber: (Priority, () {Fork: (Fiber0({ |e})) => (), Yield:() |e}~> ()) -> Fiber0({ |e})
+fun makeFiber(prio, f){
+    (prio= prio, f=f)
+}
+
+sig forever: () {Yield:() |e}~> ()
+fun forever(){ yield(); forever()}
