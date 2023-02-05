@@ -7,6 +7,7 @@ import Interface;
 alien javascript "js/runtime.js" {
     delayExecution: (Int) ~> ();
     sysEnqueue: (a) ~> ();
+    getRandom: (Int) ~> (Int);
 }
 
 
@@ -21,6 +22,8 @@ alien javascript "js/canvas.js" {
 typename Point = (x:Int, y:Int);
 
 var colors = ["green", "red", "blue", "yellow"];
+var allColors = ["red", "green", "blue", "yellow", "#801638", "#027878"];
+
 #var priorities = [High, High, Low, Low];
 var priorities = [];
 
@@ -75,9 +78,11 @@ fun start(){
     aux(colors, priorities)
 }
 
-fun buttonPressed(){
-    var prio = getValueFromSelection("prio");
-    var f = setUpLineDrawing(getValueFromSelection("line-color"));
+fun buttonPressed(prio){
+    # var prio = getValueFromSelection("prio");
+    var idx = getRandom(length(allColors));
+    print("idx: " ^^ intToString(idx));
+    var f = setUpLineDrawing(selectElem(allColors, idx));
     switch(prio){
         case "High" -> println("enqueue high"); sysEnqueue(Interface.makeFiber(High, f))
         case "Medium" -> println("enqueue low"); sysEnqueue(Interface.makeFiber(Medium, f))
@@ -126,8 +131,8 @@ fun main_page(schedule){
             width: 80%;
         }}
         .button{{
-            width: 19%;
-            min-width: 90px;
+            width: 30%;
+            min-width: 150px;
             height: 2.6em;
         }}
         .margin-all-4{{
@@ -154,7 +159,7 @@ fun main_page(schedule){
             color: black;
         }}
         .selection{{
-            width: 300px;
+            width: 400px;
             display: flex;
             justify-content: center;
         }}
@@ -163,21 +168,10 @@ fun main_page(schedule){
     <body>
         <canvas id="box" width="400" height="600" class="box center block"></canvas>
         <div class="selection margin-10 center">
-            <select id="line-color">
-                <option value="red">Red</option>
-                <option value="green">Green</option>
-                <option value="blue">Blue</option>
-                <option value="yellow">Yellow</option>
-                <option value="#801638">Berry </option>
-                <option value="#027878">Teal</option>
-            </select>
-            <select id="prio">
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-            </select>
+            <button class="block button center" l:onclick="{buttonPressed("High")}">Draw High Line</button>
+            <button class="block button center" l:onclick="{buttonPressed("Medium")}">Draw Medium Line</button>
+            <button class="block button center" l:onclick="{buttonPressed("Low")}">Draw Low Line</button>
         </div>
-        <button class="block button center" l:onclick="{buttonPressed()}">Draw Line</button>
         <a href="/scheduler1.links">Scheduler 1</a>
         <a href="/scheduler2.links">Scheduler 2</a>
         <a href="/scheduler3.links">Scheduler 3</a>

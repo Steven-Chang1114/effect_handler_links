@@ -29,6 +29,10 @@ function setIntervalForF(interval, f, kappa){
     return _$K.yield(kappa, _$Constants.UNIT);
 }
 
+function _getRandom(l) {
+    return Math.floor(Math.random() * l);
+}
+
 const SystemQueue = (function(){
 
     let queue = _$List.nil;
@@ -59,4 +63,5 @@ const SystemQueue = (function(){
 
 const sysEnqueue = _$Links.kify(SystemQueue.enqueue);
 const sysDequeue = _$Links.kify(SystemQueue.dequeue);
+const getRandom = LINKS.kify(_getRandom);
 // const sysQueueLength = _$Links.kify(SystemQueue.length);
