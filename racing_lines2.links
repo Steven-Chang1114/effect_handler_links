@@ -171,9 +171,9 @@ fun main_page(schedule){
     <body>
         <canvas id="box" width="400" height="600" class="box center block"></canvas>
         <div class="selection margin-10 center">
-            <button class="block button center" l:onclick="{buttonPressed("High")}">Draw High Line</button>
-            <button class="block button center" l:onclick="{buttonPressed("Medium")}">Draw Medium Line</button>
             <button class="block button center" l:onclick="{buttonPressed("Low")}">Draw Low Line</button>
+            <button class="block button center" l:onclick="{buttonPressed("Medium")}">Draw Medium Line</button>
+            <button class="block button center" l:onclick="{buttonPressed("High")}">Draw High Line</button>
         </div>
         <a href="/scheduler1.links">Scheduler 1</a>
         <a href="/scheduler2.links">Scheduler 2</a>
