@@ -46,7 +46,10 @@ sig drawLineInColor: (Point, Point, String) {Yield:() |e}~> ()
 fun drawLineInColor(start, end, color){
     println("start drawing " ^^ color ^^ ", yield.");
     drawHorizontalLine((x=start.x, y=start.y), (x=end.x, y=end.y), color);
-    println("finish drawing " ^^ color)
+    print("reached top, draw back");
+    drawHorizontalLine((x=end.x, y=end.y), (x=start.x, y=start.y), "white");
+    println("finish drawing " ^^ color);
+    drawLineInColor(start, end, color)
 }
 
 sig setUpLineDrawing: (String) ~> () {Yield:() |e}~> ()
@@ -193,7 +196,9 @@ fun main_page(schedule){
 
 sig main: () ~> ()
 fun main() {
-    addRoute("/", fun(_) {main_page(Scheduler2.schedule)});
+    addRoute("/", fun(_) {main_page(Scheduler.schedule)});
+    addRoute("/scheduler2.links", fun(_) {main_page(Scheduler2.schedule)});
+    addRoute("/scheduler3.links", fun(_) {main_page(Scheduler3.schedule)});
     addStaticRoute("/js", "js", [("js", "text/javascript")]);
 
     servePages()
