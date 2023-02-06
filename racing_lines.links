@@ -2,7 +2,7 @@ import Scheduler;
 import Scheduler2;
 import Scheduler3;
 import LineDrawer;
-import Interface;
+import FiberInterface;
 
 alien javascript "js/runtime.js" {
     delayExecution: (Int) ~> ();
@@ -36,7 +36,7 @@ fun drawHorizontalLine(start, end, color){
     var diff = LineDrawer.difference(end, start);
     fun aux(n, start){
         drawCustomUnit(start.x, start.y, 1, 25, color, context);
-        Interface.yield();
+        FiberInterface.yield();
         #print("DELAY " ^^ intToString(n) ^^ ", " ^^ intToString(start.x) ^^ ", "  ^^intToString(start.y));
         delayExecution(10);
         if (n > 0) aux(n -1, (x = start.x + (diff.x / LineDrawer.absolute(diff.x)), y = start.y))
@@ -67,11 +67,11 @@ fun setUpLineDrawing(color){
 }
 
 fun start(){
-    Interface.fork(Interface.makeFiber(Low, Interface.forever));
+    FiberInterface.fork(FiberInterface.makeFiber(Low, FiberInterface.forever));
     fun aux(colors, prios){
         switch((colors, prios)){
             case ([],[]) -> ()
-            case (x::xs, y::ys) -> Interface.fork(Interface.makeFiber(y, setUpLineDrawing(x))); aux(xs, ys)
+            case (x::xs, y::ys) -> FiberInterface.fork(FiberInterface.makeFiber(y, setUpLineDrawing(x))); aux(xs, ys)
             case (_, _) -> ()
         }
     }
@@ -81,19 +81,11 @@ fun start(){
 fun buttonPressed(prio, color){
     var f = setUpLineDrawing(color);
     switch(prio){
-        case "High" -> println("enqueue high"); sysEnqueue(Interface.makeFiber(High, f))
-        case "Medium" -> println("enqueue low"); sysEnqueue(Interface.makeFiber(Medium, f))
-        case "Low" -> println("enqueue low"); sysEnqueue(Interface.makeFiber(Low, f))
+        case "High" -> println("enqueue high"); sysEnqueue(FiberInterface.makeFiber(High, f))
+        case "Medium" -> println("enqueue low"); sysEnqueue(FiberInterface.makeFiber(Medium, f))
+        case "Low" -> println("enqueue low"); sysEnqueue(FiberInterface.makeFiber(Low, f))
         case _ -> ()
     }
-}
-
-fun switchToScheduler1(){
-    print("1111")
-}
-
-fun switchToScheduler2(){
-    print("2222")
 }
 
 # Web interface
@@ -101,7 +93,7 @@ fun switchToScheduler2(){
 #sig main_page : (_) ~> Page
 fun main_page(schedule){
 
-    var pId = spawnClient{schedule(Interface.makeFiber(High, start))};
+    var pId = spawnClient{schedule(FiberInterface.makeFiber(High, start))};
 
     page
     <html>

@@ -1,4 +1,4 @@
-open import Interface;
+open import FiberInterface;
 open import Queue;
 
 alien javascript "js/runtime.js" {
