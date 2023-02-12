@@ -45,6 +45,11 @@ fun drawHorizontalLine(start, end, color){
     aux(LineDrawer.absolute(diff.x), start)
 }
 
+fun drawLineInColorBack(start, end, color){
+    println("start drawing " ^^ color ^^ ", yield.");
+    drawHorizontalLine((x=start.x, y=start.y), (x=end.x, y=end.y), color);
+    println("finish drawing " ^^ color)
+}
 
 #sig drawLineInColor: (Point, Point, String) {Yield:() |e}~> ()
 fun drawLineInColor(start, end, color){
@@ -53,7 +58,7 @@ fun drawLineInColor(start, end, color){
     print("reached top, draw back");
     var curPrio = FiberInterface.getPrio();
     FiberInterface.SetPrio(None);
-    FiberInterface.fork(FiberInterface.makeFiber(Low, fun(){ drawLineInColor(end, start, "white") }));
+    FiberInterface.fork(FiberInterface.makeFiber(Low, fun(){ drawLineInColorBack(end, start, "white") }));
     println("finish drawing " ^^ color);
     FiberInterface.SetPrio(curPrio);
     drawLineInColor(start, end, color)

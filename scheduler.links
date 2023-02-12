@@ -93,84 +93,84 @@ fun schedule(fib){
     }
 
     mutual {
-      #sig fiber0ToFiber: (Fiber0({ |%e})) ~%~> Fiber({ |%e})
-      fun fiber0ToFiber(fiber){
-          (prio = fiber.prio, f = fun(state) { runFiber(fiber, state.runQ ) })
-      }
+        #sig fiber0ToFiber: (Fiber0({ |%e})) ~%~> Fiber({ |%e})
+        fun fiber0ToFiber(fiber){
+            (prio = fiber.prio, f = fun(state) { runFiber(fiber, state.runQ ) })
+        }
 
-      #sig poll: (FiberQueue({ |e})) ~> FiberQueue({ |e})
-      fun poll(q){
-          var enqueue = map(fiber0ToFiber, sysDequeue());
-          fiberBulkEnqueue(enqueue, q)
-      }
+        #sig poll: (FiberQueue({ |e})) ~> FiberQueue({ |e})
+        fun poll(q){
+            var enqueue = map(fiber0ToFiber, sysDequeue());
+            fiberBulkEnqueue(enqueue, q)
+        }
 
-      fun runFiber(fiber, runQ){
-          println("runQ: " ^^ intToString(fiberQueueLength(runQ)));
-          #dump(self());
-          handle(fiber.f()) ( state <- (prio=fiber.prio, runQ=runQ, startTime=clientTimeMilliseconds()) ){
-              case x ->
-                    print("RETURN");
-                    runNext(poll(state.runQ))
-              case <GetPrio => resume> -> resume(state.prio, state)
-              case <SetPrio(p) => resume> -> 
-                    var q = fiberEnqueue(newPrioToFiber(resume, p), state.runQ);
-                    runNext(poll(q))
-              case <Fork(f) => resume> ->
-                    print("fork");
-                    var q = poll(state.runQ);
-                    # f is new fiber, state.prio is the current fiber
-                    switch ((f.prio, state.prio)) {
-                      case (High, _) ->
-                          # Enqueue the current fiber, run the new fiber
-                          print("High fiber enqueued");
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
-                          runFiber(f, qq)
-                      case (Medium, High) ->
-                        print("Medium high fiber enqueued");
-                          # Enqueue the new fiber, run the current fiber
-                          var qq = fiberEnqueue(fiber0ToFiber(f), q);
-                          resume((), (state with runQ = qq))
-                      case (Medium, _) ->
-                          print("Medium fiber enqueued");
-                          # Enqueue the new fiber, run the current fiber
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
-                          runFiber(f, qq)
-                      case (_, High) ->
-                          # Enqueue the new fiber, run the current fiber
-                          print("Low High fiber enqueued");
-                          var qq = fiberEnqueue(fiber0ToFiber(f), q);
-                          resume((), (state with runQ = qq))
-                      case (_, Medium) ->
-                          # Enqueue the new fiber, run the current fiber
-                          print("Low Medium fiber enqueued");
-                          var qq = fiberEnqueue(fiber0ToFiber(f), q);
-                          resume((), (state with runQ = qq))
-                      case (_,_) ->
-                          # Enqueue the current fiber, run the new fiber
-                          print("Low fiber enqueued");
-                          var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
-                          runFiber(f, qq)
-                    }
-              case <Yield => resume> ->
+        fun runFiber(fiber, runQ){
+            println("runQ: " ^^ intToString(fiberQueueLength(runQ)));
+            #dump(self());
+            handle(fiber.f()) ( state <- (prio=fiber.prio, runQ=runQ, startTime=clientTimeMilliseconds()) ){
+                case x ->
+                        print("RETURN");
+                        runNext(poll(state.runQ))
+                case <GetPrio => resume> -> resume(state.prio, state)
+                case <SetPrio(p) => resume> -> 
+                        var q = fiberEnqueue(newPrioToFiber(resume, p), state.runQ);
+                        runNext(poll(q))
+                case <Fork(f) => resume> ->
+                        print("fork");
+                        var q = poll(state.runQ);
+                        # f is new fiber, state.prio is the current fiber
+                        switch ((f.prio, state.prio)) {
+                        case (High, _) ->
+                            # Enqueue the current fiber, run the new fiber
+                            print("High fiber enqueued");
+                            var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
+                            runFiber(f, qq)
+                        case (Medium, High) ->
+                            print("Medium high fiber enqueued");
+                            # Enqueue the new fiber, run the current fiber
+                            var qq = fiberEnqueue(fiber0ToFiber(f), q);
+                            resume((), (state with runQ = qq))
+                        case (Medium, _) ->
+                            print("Medium fiber enqueued");
+                            # Enqueue the new fiber, run the current fiber
+                            var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
+                            runFiber(f, qq)
+                        case (_, High) ->
+                            # Enqueue the new fiber, run the current fiber
+                            print("Low High fiber enqueued");
+                            var qq = fiberEnqueue(fiber0ToFiber(f), q);
+                            resume((), (state with runQ = qq))
+                        case (_, Medium) ->
+                            # Enqueue the new fiber, run the current fiber
+                            print("Low Medium fiber enqueued");
+                            var qq = fiberEnqueue(fiber0ToFiber(f), q);
+                            resume((), (state with runQ = qq))
+                        case (_,_) ->
+                            # Enqueue the current fiber, run the new fiber
+                            print("Low fiber enqueued");
+                            var qq = fiberEnqueue(resumptionToFiber(resume, state.prio), q);
+                            runFiber(f, qq)
+                        }
+                case <Yield => resume> ->
                     #print("YIELD");
-                  var currentTime = clientTimeMilliseconds();
-                  var buffer = switch(state.prio){
-                      case High -> 400
-                      case Medium -> 200
-                      case Low -> 100
-                      case None -> 0
-                  };
-                  #print("TIME: " ^^ intToString(currentTime - state.startTime) ^^ "," ^^ intToString(buffer));
-                  if (currentTime - state.startTime <= buffer) {
-                    #print("RESUME"); 
-                    resume((), state)
-                  } else{
-                    #print("SWITCH");
-                      var q = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
-                      runNext(poll(q))
-                  }
-          }
-      }
+                    var currentTime = clientTimeMilliseconds();
+                    var buffer = switch(state.prio){
+                        case High -> 400
+                        case Medium -> 200
+                        case Low -> 100
+                        case None -> 0
+                    };
+                    #print("TIME: " ^^ intToString(currentTime - state.startTime) ^^ "," ^^ intToString(buffer));
+                    if (currentTime - state.startTime <= buffer) {
+                        #print("RESUME"); 
+                        resume((), state)
+                    } else{
+                        #print("SWITCH");
+                        var q = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
+                        runNext(poll(q))
+                    }
+            }
+        }
     }
 
     runFiber(fib, emptyPrioQueue())
