@@ -1,6 +1,5 @@
 import Scheduler;
 import Scheduler2;
-import Scheduler3;
 import LineDrawer;
 import FiberInterface;
 
@@ -59,7 +58,7 @@ fun drawLineInColor(start, end, color){
     var curPrio = FiberInterface.getPrio();
     FiberInterface.SetPrio(None);
     FiberInterface.fork(FiberInterface.makeFiber(Low, fun(){ drawLineInColorBack(end, start, "white") }));
-    println("finish drawing " ^^ color);
+    println("Getting ready to draw again");
     FiberInterface.SetPrio(curPrio);
     drawLineInColor(start, end, color)
 }
@@ -175,7 +174,6 @@ fun main_page(schedule){
         </div>
         <a href="/scheduler1.links">Scheduler 1</a>
         <a href="/scheduler2.links">Scheduler 2</a>
-        <a href="/scheduler3.links">Scheduler 3</a>
         <div id="data" display="none">
             <div id="start-x" value="10"></div>
             <div id="start-y" value="10"></div>
@@ -190,7 +188,6 @@ sig main: () ~> ()
 fun main() {
     addRoute("/", fun(_) {main_page(Scheduler.schedule)});
     addRoute("/scheduler2.links", fun(_) {main_page(Scheduler2.schedule)});
-    addRoute("/scheduler3.links", fun(_) {main_page(Scheduler3.schedule)});
     addStaticRoute("/js", "js", [("js", "text/javascript")]);
 
     servePages()

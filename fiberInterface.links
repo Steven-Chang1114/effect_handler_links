@@ -11,12 +11,12 @@ fun yield(){
     do Yield
 }
 
-sig getPrio: () {GetPrio:() |e}~> ()
+#sig getPrio: () {GetPrio:() |e}~> ()
 fun getPrio(){
     do GetPrio
 }
 
-sig setPrio: (Priority) {SetPrio: (Priority) |e}~> ()
+#sig setPrio: (Priority) {SetPrio: (Priority) |e}~> ()
 fun setPrio(p){
     do SetPrio(p)
 }

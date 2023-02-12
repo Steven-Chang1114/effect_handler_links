@@ -122,6 +122,7 @@ fun schedule(fib){
                         case High -> 40
                         case Medium -> 20
                         case Low -> 10
+                        case None -> 0
                     };
                     var c = state.count + 1;
 
