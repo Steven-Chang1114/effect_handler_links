@@ -5,14 +5,44 @@ alien javascript "js/runtime.js" {
     sysDequeue: () ~> [a];
 }
 
-typename PrioQueue(a) = (queue: Queue(a));
-typename SchedulerState(a) = (runQ: PrioQueue(a), prio: Priority, count: Int);
+typename PrioQueue(a) = (high: Queue(a), medium: Queue(a), low: Queue(a), none: Queue(a));
+typename SchedulerState(a) = (runQ: PrioQueue(a), prio: Priority, startTime: Int);
 typename Fiber(e::Eff) = (prio:Priority, f: (SchedulerState(Fiber({ |e}))) ~e~> ());
 typename FiberQueue(e::Eff) = PrioQueue(Fiber({ |e}));
 
+sig priorityEnqueue: (a, Priority, PrioQueue(a)) ~> PrioQueue(a)
+fun priorityEnqueue(x, prio, pq){
+    switch(prio){
+        case High -> (pq with high = enqueue(x, pq.high))
+        case Medium -> (pq with medium = enqueue(x, pq.medium))
+        case Low -> (pq with low = enqueue(x, pq.low))
+        case None -> (pq with none = enqueue(x, pq.none))
+    }
+}
+
+sig priorityDequeue: (PrioQueue(a)) ~> (Maybe((a, Priority)), PrioQueue(a) )
+fun priorityDequeue(pq){
+    switch(dequeue(pq.high)){
+        case (Just(x), q) -> (Just((x, High)), (pq with high= q))
+        case (Nothing,_) ->
+            switch(dequeue(pq.medium)){
+                case (Just(x), q) -> (Just((x, Medium)), (pq with medium= q))
+                case (Nothing,_) ->
+                    switch(dequeue(pq.low)){
+                        case (Just(x), q) -> (Just((x, Low)), (pq with low=q))
+                        case (Nothing, _) -> 
+                            switch(dequeue(pq.none)){
+                                case (Just(x), q) -> (Just((x, None)), (pq with none=q))
+                                case (Nothing, _) -> print("Dequeue empty"); (Nothing, pq)
+                            }
+                    }
+            }
+    }
+}
+
 sig fiberEnqueue: (Fiber({ |e}), FiberQueue({ |e})) ~> FiberQueue({ |e})
-fun fiberEnqueue(f, pq){
-    (pq with queue = enqueue(f, pq.queue))
+fun fiberEnqueue(f, q){
+    priorityEnqueue(f, f.prio, q)
 }
 
 sig fiberBulkEnqueue: ([Fiber({ |e})], FiberQueue({ |e})) ~> FiberQueue({ |e})
@@ -25,21 +55,18 @@ fun fiberBulkEnqueue(fibers, q){
     }
 }
 
-#sig fiberDequeue: (FiberQueue({ |e})) ~> (Maybe((Fiber({ |e}), Priority)), FiberQueue({ |e}))
-fun fiberDequeue(pq){
-    switch(dequeue(pq.queue)){
-        case (Nothing, _) -> print("Dequeue empty"); (Nothing, pq)
-        case (Just(x), q) -> (Just((x, x.prio)), (pq with queue=q))
-    }
+sig fiberDequeue: (FiberQueue({ |e})) ~> (Maybe((Fiber({ |e}), Priority)), FiberQueue({ |e}))
+fun fiberDequeue(q){
+    priorityDequeue(q)
 }
 
 fun emptyPrioQueue(){
-    (queue=emptyQueue())
+    (high= emptyQueue(), medium=emptyQueue(), low=emptyQueue(), none=emptyQueue())
 }
 
 sig fiberQueueLength: (FiberQueue({ |e}))  -> Int
 fun fiberQueueLength(q){
-    length(q.queue.rear) + length(q.queue.front)
+    length(q.low.rear) + length(q.high.front) + length(q.high.rear) + length(q.medium.front) + length(q.medium.rear) + length(q.low.front)
 }
 
 #sig schedule: (Fiber0({ |e})) {Yield-, Fork- | e}~> ()
@@ -47,7 +74,7 @@ fun schedule(fib){
 
     #sig makeSchedulerState: (Priority, PrioQueue(a)) ~> SchedulerState(a)
     fun makeSchedulerState(prio, q){
-        (runQ = q, prio = prio, count = 0)
+        (runQ = q, prio = prio, startTime = clientTimeMilliseconds())
     }
 
     fun runNext(q){
@@ -80,10 +107,10 @@ fun schedule(fib){
         fun runFiber(fiber, runQ){
             println("runQ: " ^^ intToString(fiberQueueLength(runQ)));
             #dump(self());
-            handle(fiber.f()) ( state <- (prio=fiber.prio, runQ=runQ, count = 0) ){
+            handle(fiber.f()) ( state <- (prio=fiber.prio, runQ=runQ, startTime=clientTimeMilliseconds()) ){
                 case x ->
-                    print("RETURN");
-                    runNext(poll(state.runQ))
+                        print("RETURN");
+                        runNext(poll(state.runQ))
                 case <GetPrio => resume> -> resume(state.prio, state)
                 case <SetPrio(p) => resume> -> 
                         var q = fiberEnqueue(newPrioToFiber(resume, p), state.runQ);
@@ -126,17 +153,17 @@ fun schedule(fib){
                         }
                 case <Yield => resume> ->
                     #print("YIELD");
-                    var steps = switch(state.prio){
-                        case High -> 40
-                        case Medium -> 20
-                        case Low -> 10
+                    var currentTime = clientTimeMilliseconds();
+                    var buffer = switch(state.prio){
+                        case High -> 400
+                        case Medium -> 200
+                        case Low -> 100
                         case None -> 0
                     };
-                    var c = state.count + 1;
-
-                    if (c < steps) {
+                    #print("TIME: " ^^ intToString(currentTime - state.startTime) ^^ "," ^^ intToString(buffer));
+                    if (currentTime - state.startTime <= buffer) {
                         #print("RESUME"); 
-                        resume((), (state with count = c))
+                        resume((), state)
                     } else{
                         #print("SWITCH");
                         var q = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
