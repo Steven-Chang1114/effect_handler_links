@@ -56,10 +56,10 @@ fun drawLineInColor(start, end, color){
     drawHorizontalLine((x=start.x, y=start.y), (x=end.x, y=end.y), color);
     print("reached top, draw back");
     var curPrio = FiberInterface.getPrio();
-    FiberInterface.SetPrio(None);
     FiberInterface.fork(FiberInterface.makeFiber(Low, fun(){ drawLineInColorBack(end, start, "white") }));
+    FiberInterface.setPrio(None);
     println("Getting ready to draw again");
-    FiberInterface.SetPrio(curPrio);
+    FiberInterface.setPrio(curPrio);
     drawLineInColor(start, end, color)
 }
 
