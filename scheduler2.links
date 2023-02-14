@@ -25,7 +25,7 @@ fun fiberBulkEnqueue(fibers, q){
     }
 }
 
-#sig fiberDequeue: (FiberQueue({ |e})) ~> (Maybe((Fiber({ |e}), Priority)), FiberQueue({ |e}))
+sig fiberDequeue: (FiberQueue({ |e})) ~> (Maybe((Fiber({ |e}), Priority)), FiberQueue({ |e}))
 fun fiberDequeue(pq){
     switch(dequeue(pq.queue)){
         case (Nothing, _) -> print("Dequeue empty"); (Nothing, pq)
@@ -45,7 +45,7 @@ fun fiberQueueLength(q){
 #sig schedule: (Fiber0({ |e})) {Yield-, Fork- | e}~> ()
 fun schedule(fib){
 
-    #sig makeSchedulerState: (Priority, PrioQueue(a)) ~> SchedulerState(a)
+    sig makeSchedulerState: (Priority, PrioQueue(a)) ~> SchedulerState(a)
     fun makeSchedulerState(prio, q){
         (runQ = q, prio = prio, count = 0)
     }
@@ -66,7 +66,7 @@ fun schedule(fib){
     }
 
     mutual {
-        #sig fiber0ToFiber: (Fiber0({ |%e})) ~%~> Fiber({ |%e})
+        sig fiber0ToFiber: (Fiber0({ |%e})) ~%~> Fiber({ |%e})
         fun fiber0ToFiber(fiber){
             (prio = fiber.prio, f = fun(state) { runFiber(fiber, state.runQ ) })
         }
