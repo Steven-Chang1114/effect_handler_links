@@ -5,18 +5,18 @@ fun printMessage() {
 
 fun reverse(m) {
     handle(m()) {
-        case Print(val, k) -> k(()); print(val)
-        case Return(x) -> ()
+        case <Print(val) => k> -> k(()); print(val)
+        case x -> ()
     }
 }
 
 fun forward(m) {
     handle(m()) {
-        case Print(val, k) -> print(val); k(())
-        case Return(x) -> ()
+        case <Print(val) => k> -> print(val); k(())
+        case x -> ()
     }
 }
 
 
-# reverse(printMessage)
-forward(printMessage)
+reverse(printMessage)
+#forward(printMessage)
