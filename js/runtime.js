@@ -1,11 +1,9 @@
-
-
-// function systemYield(f, kappa){
-//     window.requestAnimationFrame(function(){
-//         return f(_$Constants.UNIT, _$K.idy);
-//     });
-//     return _$Constants.UNIT;
-// }
+function systemYield(f, kappa){
+    window.requestAnimationFrame(function(){
+        return f(_$Constants.UNIT, _$K.idy);
+    });
+    return _$Constants.UNIT;
+}
 
 function delayExecution(delay, kappa){
     window.setTimeout(function(){return _$K.yield(kappa, _$Constants.UNIT);}, delay);
@@ -29,10 +27,6 @@ function setIntervalForF(interval, f, kappa){
     return _$K.yield(kappa, _$Constants.UNIT);
 }
 
-function _getRandom(l) {
-    return Math.floor(Math.random() * l);
-}
-
 const SystemQueue = (function(){
 
     let queue = _$List.nil;
@@ -48,20 +42,16 @@ const SystemQueue = (function(){
         return temp;
     }
 
-    // function length(){
-    //     return _$List.length(queue);
-    // }
-
-    // return { "enqueue": enqueue
-    //        , "dequeue": dequeue
-    //        , "length" : length }
+    function length(){
+        return _$List.length(queue);
+    }
 
     return { "enqueue": enqueue
-           , "dequeue": dequeue}
+           , "dequeue": dequeue
+           , "length" : length }
 
 }());
 
 const sysEnqueue = _$Links.kify(SystemQueue.enqueue);
 const sysDequeue = _$Links.kify(SystemQueue.dequeue);
-const getRandom = LINKS.kify(_getRandom);
-// const sysQueueLength = _$Links.kify(SystemQueue.length);
+const sysQueueLength = _$Links.kify(SystemQueue.length);
