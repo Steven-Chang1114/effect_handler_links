@@ -22,7 +22,7 @@ alien javascript "js/canvas.js" {
 typename Point = (x:Int, y:Int);
 
 var colors = ["green", "red", "blue", "yellow"];
-var priorities = [High, High, Low, Low];
+var priorities = [Low, High, Low, High];
 
 # Page Functionality
 
