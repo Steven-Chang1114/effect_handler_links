@@ -7,18 +7,14 @@ import FiberInterface;
 alien javascript "js/runtime.js" {
     delayExecution: (Int) ~> ();
     sysEnqueue: (a) ~> ();
-    getRandom: (Int) ~> (Int);
 }
 
-
-# Page functionality
-
-typename Canvas = ();
 alien javascript "js/canvas.js" {
     drawCustomUnit: (Int, Int, Int, Int, String, Canvas) ~> ();
     getValueFromSelection: (String) ~> String;
 }
 
+typename Canvas = ();
 typename Point = (x:Int, y:Int);
 
 var colors = ["green", "red", "blue", "yellow"];
