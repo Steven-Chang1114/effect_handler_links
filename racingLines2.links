@@ -101,61 +101,7 @@ fun main_page(schedule){
     page
     <html>
     <head>
-        <style>
-        .center{{
-            margin: 0 auto;
-        }}
-        .block{{
-            display: block;
-        }}
-        .box{{
-            width: 400px;
-            height: 600px;
-            border: solid 1px #aaa;
-        }}
-        a {{
-            display:flex;
-            justify-content: center; 
-        }}
-        .buttons{{
-            display:flex;
-            justify-content: center;
-            width: 80%;
-        }}
-        .button{{
-            width: 30%;
-            min-width: 150px;
-            height: 2.6em;
-        }}
-        .margin-all-4{{
-            margin:4px;
-        }}
-        .margin-10{{
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }}
-        .red{{
-            background-color: red;
-            color: white;
-        }}
-        .blue{{
-            background-color: blue;
-            color: white;
-        }}
-        .green{{
-            background-color: green;
-            color: white;
-        }}
-        .yellow{{
-            background-color: yellow;
-            color: black;
-        }}
-        .selection{{
-            width: 400px;
-            display: flex;
-            justify-content: center;
-        }}
-        </style>
+        <link rel="stylesheet" href="css/racingLines.css" type="text/css" />
     </head>
     <body>
         <canvas id="box" width="400" height="600" class="box center block"></canvas>
@@ -180,6 +126,7 @@ fun main_page(schedule){
 sig main: () ~> ()
 fun main() {
     addRoute("/", fun(_) {main_page(Scheduler.schedule)});
+    addStaticRoute("/css", "css", [("css", "text/css")]);
     addRoute("/scheduler2.links", fun(_) {main_page(Scheduler2.schedule)});
     addRoute("/scheduler3.links", fun(_) {main_page(Scheduler3.schedule)});
     addStaticRoute("/js", "js", [("js", "text/javascript")]);
