@@ -4,6 +4,9 @@ import Scheduler3;
 import LineDrawer;
 import FiberInterface;
 
+typename Canvas = ();
+typename Point = (x:Int, y:Int);
+
 alien javascript "js/runtime.js" {
     delayExecution: (Int) ~> ();
     sysEnqueue: (a) ~> ();
@@ -11,11 +14,7 @@ alien javascript "js/runtime.js" {
 
 alien javascript "js/canvas.js" {
     drawCustomUnit: (Int, Int, Int, Int, String, Canvas) ~> ();
-    getValueFromSelection: (String) ~> String;
 }
-
-typename Canvas = ();
-typename Point = (x:Int, y:Int);
 
 var colors = ["green", "red", "blue", "yellow"];
 var allColors = ["red", "green", "blue", "yellow", "#801638", "#027878"];
