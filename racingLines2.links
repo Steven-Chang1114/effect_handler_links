@@ -105,9 +105,11 @@ fun main_page(schedule){
             <button class="block button center" l:onclick="{buttonPressed("Medium", "blue")}">Draw Medium Line</button>
             <button class="block button center" l:onclick="{buttonPressed("High", "green")}">Draw High Line</button>
         </div>
-        <a href="/scheduler1.links">Scheduler 1</a>
-        <a href="/scheduler2.links">Scheduler 2</a>
-        <a href="/scheduler3.links">Scheduler 3</a>
+        <div class="links">
+            <a href="/scheduler1.links">Scheduler 1</a>
+            <a href="/scheduler2.links">Scheduler 2</a>
+            <a href="/scheduler3.links">Scheduler 3</a>
+        </div>
         <div id="data" display="none">
             <div id="start-x" value="10"></div>
             <div id="start-y" value="10"></div>

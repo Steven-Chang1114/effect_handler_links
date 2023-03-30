@@ -4,25 +4,23 @@ import Scheduler3;
 import LineDrawer;
 import FiberInterface;
 
+typename Canvas = ();
+typename Point = (x:Int, y:Int);
+
 alien javascript "js/runtime.js" {
     delayExecution: (Int) ~> ();
     sysEnqueue: (a) ~> ();
-    getRandom: (Int) ~> (Int);
 }
 
-
-# Page functionality
-
-typename Canvas = ();
 alien javascript "js/canvas.js" {
     drawCustomUnit: (Int, Int, Int, Int, String, Canvas) ~> ();
-    getValueFromSelection: (String) ~> String;
 }
 
-typename Point = (x:Int, y:Int);
-
 var colors = ["green", "red", "blue", "yellow"];
+var allColors = ["red", "green", "blue", "yellow", "#801638", "#027878"];
+
 var priorities = [Low, High, Low, High];
+#var priorities = [];
 
 # Page Functionality
 
@@ -93,7 +91,7 @@ fun main_page(schedule){
     var pId = spawnClient{schedule(FiberInterface.makeFiber(High, start))};
 
     page
-    <html>
+       <html>
     <head>
         <style>
         .center{{
@@ -112,10 +110,14 @@ fun main_page(schedule){
             justify-content: center;
             width: 80%;
         }}
+        select{{
+            font-size: 30px;
+        }}
         .button{{
             width: 19%;
             min-width: 90px;
             height: 2.6em;
+            font-size: 25px;
         }}
         .margin-all-4{{
             margin:4px;
@@ -160,6 +162,7 @@ fun main_page(schedule){
             </select>
             <select id="prio">
                 <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
                 <option value="High">High</option>
             </select>
         </div>
@@ -177,6 +180,7 @@ fun main_page(schedule){
 sig main: () ~> ()
 fun main() {
     addRoute("/", fun(_) {main_page(Scheduler.schedule)});
+    addStaticRoute("/css", "css", [("css", "text/css")]);
     addRoute("/scheduler2.links", fun(_) {main_page(Scheduler2.schedule)});
     addRoute("/scheduler3.links", fun(_) {main_page(Scheduler3.schedule)});
     addStaticRoute("/js", "js", [("js", "text/javascript")]);
