@@ -40,11 +40,11 @@ fun priorityDequeue(pq, prio){
         case Medium -> switch(dequeue(pq.medium)) {
                         case (Just(x), q) -> (Just((x, Medium)), (pq with medium= q))
                         case (Nothing,_) ->
-                            switch(dequeue(pq.low)){
-                                case (Just(x), q) -> (Just((x, Low)), (pq with low= q))
+                            switch(dequeue(pq.high)){
+                                case (Just(x), q) -> (Just((x, High)), (pq with high= q))
                                 case (Nothing,_) ->
-                                    switch(dequeue(pq.high)){
-                                        case (Just(x), q) -> (Just((x, High)), (pq with high=q))
+                                    switch(dequeue(pq.low)){
+                                        case (Just(x), q) -> (Just((x, Low)), (pq with low=q))
                                         case (Nothing, _) -> print("Dequeue empty"); (Nothing, pq)
                                     }
                             }
