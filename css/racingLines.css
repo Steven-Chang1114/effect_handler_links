@@ -21,13 +21,14 @@ a{
     width: 80%;
 }
 a{
+    display: block;
     font-size: 30px;
 }
 .button{
     width: 30%;
     min-width: 150px;
     height: 2.6em;
-    font-size: 20px;
+    font-size: 25px;
 }
 .margin-all-4{
     margin:4px;

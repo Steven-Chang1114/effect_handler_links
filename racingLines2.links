@@ -29,15 +29,15 @@ fun drawHorizontalLine(start, end, color){
     var div = getNodeById("box");
     var context = jsGetContext2D(div);
     var diff = LineDrawer.difference(end, start);
-    fun aux(n, start){
+    fun drawSlice(n, start){
         drawCustomUnit(start.x, start.y, 1, 25, color, context);
         FiberInterface.yield();
         #print("DELAY " ^^ intToString(n) ^^ ", " ^^ intToString(start.x) ^^ ", "  ^^intToString(start.y));
         delayExecution(5);
-        if (n > 0) aux(n -1, (x = start.x + (diff.x / LineDrawer.absolute(diff.x)), y = start.y))
+        if (n > 0) drawSlice(n -1, (x = start.x + (diff.x / LineDrawer.absolute(diff.x)), y = start.y))
         else ()
     }
-    aux(LineDrawer.absolute(diff.x), start)
+    drawSlice(LineDrawer.absolute(diff.x), start)
 }
 
 sig drawLineInColor: (Point, Point, String) {Yield:() |e}~> ()
@@ -101,14 +101,14 @@ fun main_page(schedule){
     <body>
         <canvas id="box" width="400" height="600" class="box center block"></canvas>
         <div class="selection margin-10 center">
-            <button class="block button center" l:onclick="{buttonPressed("Low", "red")}">Draw Low Line</button>
-            <button class="block button center" l:onclick="{buttonPressed("Medium", "blue")}">Draw Medium Line</button>
-            <button class="block button center" l:onclick="{buttonPressed("High", "green")}">Draw High Line</button>
+            <button class="block button center" l:onclick="{buttonPressed("Low", "red")}">Low</button>
+            <button class="block button center" l:onclick="{buttonPressed("Medium", "blue")}">Med</button>
+            <button class="block button center" l:onclick="{buttonPressed("High", "green")}">High</button>
         </div>
         <div class="links">
-            <a href="/scheduler1.links">Scheduler 1</a>
-            <a href="/scheduler2.links">Scheduler 2</a>
-            <a href="/scheduler3.links">Scheduler 3</a>
+            <a href="/scheduler1.links">Time-based Scheduler</a>
+            <a href="/scheduler2.links">Step-based Scheduler</a>
+            <a href="/scheduler3.links">Probability-based Scheduler</a>
         </div>
         <div id="data" display="none">
             <div id="start-x" value="10"></div>
