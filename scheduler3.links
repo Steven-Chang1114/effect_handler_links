@@ -124,13 +124,10 @@ fun schedule(fib){
         var prob = floatToInt(random() *. 100.0);
 
         if (prob <= 20) {
-            #print("Next is Low");
             Low
         } else if (prob <= 50) {
-            #print("Next is Medium");
             Medium
         } else {
-            #print("Next is High");
             High
         }
     }
@@ -197,13 +194,10 @@ fun schedule(fib){
                             runFiber(f, qq)
                         }
                 case <Yield => resume> ->
-                    #print("YIELD");
                     var currentTime = clientTimeMilliseconds();
                     if (currentTime - state.startTime <= bufferTime) {
-                        #print("RESUME"); 
                         resume((), state)
                     } else{
-                        #print("SWITCH");
                         var nextPrio = getNextPrio();
                         var q = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
                         runNext(poll(q), nextPrio)

@@ -19,7 +19,6 @@ alien javascript "js/canvas.js" {
 var colors = ["green", "red", "blue", "yellow"];
 var allColors = ["red", "green", "blue", "yellow", "#801638", "#027878"];
 
-#var priorities = [High, High, Low, Low];
 var priorities = [];
 
 # Page Functionality
@@ -85,7 +84,6 @@ fun buttonPressed(prio, color){
 
 # Web interface
 
-#sig main_page : (_) ~> Page
 fun main_page(schedule){
 
     var pId = spawnClient{schedule(FiberInterface.makeFiber(High, start))};

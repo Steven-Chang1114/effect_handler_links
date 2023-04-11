@@ -152,7 +152,6 @@ fun schedule(fib){
                             runFiber(f, qq)
                         }
                 case <Yield => resume> ->
-                    #print("YIELD");
                     var currentTime = clientTimeMilliseconds();
                     var buffer = switch(state.prio){
                         case High -> 400
@@ -160,12 +159,9 @@ fun schedule(fib){
                         case Low -> 100
                         case None -> 0
                     };
-                    #print("TIME: " ^^ intToString(currentTime - state.startTime) ^^ "," ^^ intToString(buffer));
                     if (currentTime - state.startTime <= buffer) {
-                        #print("RESUME"); 
                         resume((), state)
                     } else{
-                        #print("SWITCH");
                         var q = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
                         runNext(poll(q))
                     }

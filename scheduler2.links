@@ -82,20 +82,17 @@ fun schedule(fib){
             #dump(self());
             handle(fiber.f()) ( state <- (prio=fiber.prio, runQ=runQ, step = 0) ){
                 case x ->
-                    print("RETURN");
                     runNext(poll(state.runQ))
                 case <GetPrio => resume> -> resume(state.prio, state)
                 case <SetPrio(p) => resume> -> 
                         var q = fiberEnqueue(newPrioToFiber(resume, p), state.runQ);
                         runNext(poll(q))
                 case <Fork(f) => resume> ->
-                        print("fork");
                         var q = poll(state.runQ);
                         # f is new fiber, state.prio is the current fiber
                         var qq = fiberEnqueue(fiber0ToFiber(f), q);
                         resume((), (state with runQ = qq))
                 case <Yield => resume> ->
-                    #print("YIELD");
                     var steps = switch(state.prio){
                         case High -> 40
                         case Medium -> 20
@@ -105,10 +102,8 @@ fun schedule(fib){
                     var c = state.step + 1;
 
                     if (c < steps) {
-                        #print("RESUME"); 
                         resume((), (state with step = c))
                     } else{
-                        #print("SWITCH");
                         var q = fiberEnqueue(resumptionToFiber(resume, state.prio), state.runQ);
                         runNext(poll(q))
                     }
